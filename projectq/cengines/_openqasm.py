@@ -53,6 +53,38 @@ class OpenQASMEngine(BasicEngine):
                                            qreg/creg.
                                            If False, simply create a new
                                            qreg/creg for each new Qubit ID
+
+        Example:
+            .. code-block:: python
+
+                from projectq.cengines import MainEngine, OpenQASMEngine
+
+                backend = OpenQASMEngine()
+                eng = MainEngine(backend=backend)
+                # do something ...
+                eng.flush()
+                qc = backend.circuit # get the corresponding Qiskit circuit
+
+        If you have a ProjectQ program with multiple measurements (followed by
+        `eng.flush()`) the OpenQASMEngine can automatically generate a list of
+        circuits:
+
+        Example:
+            .. code-block:: python
+
+                from projectq.cengines import MainEngine, OpenQASMEngine
+
+                qc_list = []
+                def process(qc):
+                    qc_list.append(qc)
+
+                backend = OpenQASMEngine(process_func=process)
+                eng = MainEngine(backend=backend)
+                # do something ...
+                eng.flush()
+                # do something ...
+                eng.flush()
+                qc_list # contains a list of successive circuits
         """
         BasicEngine.__init__(self)
         self._was_flushed = False
@@ -67,7 +99,10 @@ class OpenQASMEngine(BasicEngine):
     @property
     def circuit(self):
         """
-        Return the current OpenQASM circuit stored by this engine
+        Return the last OpenQASM circuit stored by this engine
+
+        Note:
+            This is essentially the quantum circuit up to the last FlushGate.
         """
         return self._openqasm_circuit
 
@@ -114,7 +149,7 @@ class OpenQASMEngine(BasicEngine):
         """
         Temporarily store the command cmd.
 
-        Translates the command and stores it in a local variable
+        Translates the command and stores it the _openqasm_circuit attribute
         (self._openqasm_circuit)
 
         Args:
