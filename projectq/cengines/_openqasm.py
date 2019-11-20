@@ -23,21 +23,28 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 # ==============================================================================
 
+def _dummy_process(qc):
+    pass
+
+# ==============================================================================
+
 
 class OpenQASMEngine(BasicEngine):
     """
     Engine to convert ProjectQ commands to OpenQASM using qiskit
     """
 
-    def __init__(self, process_func, qubit_id_mapping_redux=True):
+    def __init__(self, process_func=_dummy_process,
+                 qubit_id_mapping_redux=True):
         """
         Initialize the OpenQASMEngine object.
 
         Args:
             process_func (function): Function to be called periodically to
-                                     process a qiskit.QuantumCircuit.
-                                     This function should accept a single
-                                     argument: a qiskit.QuantumCircuit.
+                process a qiskit.QuantumCircuit. This happens anytime a
+                FlushGate gets processed by the engine.
+                This function should accept a single argument:
+                qiskit.QuantumCircuit.
             qubit_id_mapping_redux (bool): If True, try to allocate new Qubit
                                            IDs to the next available qreg/creg
                                            (if any), otherwise create a new
@@ -53,6 +60,13 @@ class OpenQASMEngine(BasicEngine):
         self._qubit_id_mapping_redux = qubit_id_mapping_redux
         self._reg_index = 0
         self._available_indices = []
+
+    @property
+    def qasm(self):
+        """
+        Return the current OpenQASM circuit stored by this engine
+        """
+        return self._openqasm_circuit
 
     def is_available(self, cmd):
         """
