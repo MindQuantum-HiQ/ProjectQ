@@ -23,8 +23,10 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 # ==============================================================================
 
+
 def _dummy_process(qc):
     pass
+
 
 # ==============================================================================
 
@@ -33,8 +35,8 @@ class OpenQASMEngine(BasicEngine):
     """
     Engine to convert ProjectQ commands to OpenQASM using qiskit
     """
-
-    def __init__(self, process_func=_dummy_process,
+    def __init__(self,
+                 process_func=_dummy_process,
                  qubit_id_mapping_redux=True):
         """
         Initialize the OpenQASMEngine object.
@@ -53,6 +55,7 @@ class OpenQASMEngine(BasicEngine):
                                            qreg/creg for each new Qubit ID
         """
         BasicEngine.__init__(self)
+        self._was_flushed = False
         self._openqasm_circuit = QuantumCircuit()
         self._process_func = process_func
         self._qreg_dict = dict()
@@ -62,7 +65,7 @@ class OpenQASMEngine(BasicEngine):
         self._available_indices = []
 
     @property
-    def qasm(self):
+    def circuit(self):
         """
         Return the current OpenQASM circuit stored by this engine
         """
@@ -120,6 +123,10 @@ class OpenQASMEngine(BasicEngine):
         gate = cmd.gate
         n_controls = get_control_count(cmd)
 
+        _ccontrolled_gates_func = {
+            X: self._openqasm_circuit.ccx,
+            NOT: self._openqasm_circuit.ccx,
+        }
         _controlled_gates_func = {
             H: self._openqasm_circuit.ch,
             Ph: self._openqasm_circuit.cu1,
@@ -149,6 +156,9 @@ class OpenQASMEngine(BasicEngine):
             Z: self._openqasm_circuit.z,
             Swap: self._openqasm_circuit.swap
         }
+
+        if self._was_flushed:
+            self._reset_after_flush()
 
         if gate == Allocate:
             add = True
@@ -185,10 +195,18 @@ class OpenQASMEngine(BasicEngine):
                                            self._creg_dict[qb_id])
 
         elif n_controls == 2:
-            control = cmd.control_qubits
-            self._openqasm_circuit.ccx(self._qreg_dict[control[0].id],
-                                       self._qreg_dict[control[1].id],
-                                       self._qreg_dict[cmd.qubits[0][0].id])
+            targets = [
+                self._qreg_dict[qb.id] for qureg in cmd.qubits for qb in qureg
+            ]
+            controls = [self._qreg_dict[qb.id] for qb in cmd.control_qubits]
+
+            try:
+                _ccontrolled_gates_func[gate](*(controls + targets))
+            except KeyError:
+                raise RuntimeError(
+                    'Unable to perform {} gate with n=2 control qubits'.format(
+                        gate))
+
         elif n_controls == 1:
             target_qureg = [
                 self._qreg_dict[qb.id] for qureg in cmd.qubits for qb in qureg
@@ -212,8 +230,9 @@ class OpenQASMEngine(BasicEngine):
                         self._qreg_dict[cmd.control_qubits[0].id],
                         *target_qureg)
             except KeyError as e:
-                e.args = e.args[0] + '\nCurrent command: {}'.format(cmd)
-                raise e
+                raise RuntimeError(
+                    'Unable to perform {} gate with n=1 control qubits'.format(
+                        gate))
         else:
             target_qureg = [
                 self._qreg_dict[qb.id] for qureg in cmd.qubits for qb in qureg
@@ -225,11 +244,11 @@ class OpenQASMEngine(BasicEngine):
             else:
                 _gates_func[gate](*target_qureg)
 
-    def _run(self):
+    def _reset_after_flush(self):
         """
-        Run the circuit.
+        Reset the internal quantum circuit after a FlushGate
         """
-        self._process_func(self._openqasm_circuit)
+        self._was_flushed = False
         regs = []
         regs.extend(self._openqasm_circuit.qregs)
         regs.extend(self._openqasm_circuit.cregs)
@@ -237,6 +256,13 @@ class OpenQASMEngine(BasicEngine):
         self._openqasm_circuit = QuantumCircuit()
         for reg in regs:
             self._openqasm_circuit.add_register(reg)
+
+    def _run(self):
+        """
+        Run the circuit.
+        """
+        self._was_flushed = True
+        self._process_func(self._openqasm_circuit)
 
     def receive(self, command_list):
         """
@@ -254,5 +280,3 @@ class OpenQASMEngine(BasicEngine):
 
         if not self.is_last_engine:
             self.send(command_list)
-        else:
-            pass

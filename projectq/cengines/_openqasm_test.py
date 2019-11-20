@@ -119,18 +119,13 @@ def test_openqasm_allocate_deallocate(qubit_id_redux):
                           (Ry(0.5), True), (Rz(0.5), True), (R(0.5), True),
                           (Ph(0.5), True), (Barrier, True), (Entangle, False)])
 def test_openqasm_is_available(gate, is_available):
-    qc_list = []
-
-    def _process(circuit):
-        qc_list.append(circuit)
-
     eng = MainEngine(backend=DummyEngine(),
-                     engine_list=[OpenQASMEngine(_process)])
+                     engine_list=[OpenQASMEngine()])
     qubit1 = eng.allocate_qubit()
     cmd = Command(eng, gate, (qubit1, ))
     eng.is_available(cmd) == is_available
 
-    eng = MainEngine(backend=OpenQASMEngine(_process),
+    eng = MainEngine(backend=OpenQASMEngine(),
                      engine_list=[])
     qubit1 = eng.allocate_qubit()
     cmd = Command(eng, gate, (qubit1, ))
@@ -144,19 +139,14 @@ def test_openqasm_is_available(gate, is_available):
                                                 (Rx(0.5), False),
                                                 (Ry(0.5), False)])
 def test_openqasm_is_available_1control(gate, is_available):
-    main_circuit = QuantumCircuit()
-
-    def _process(circuit):
-        main_circuit.extend(circuit)
-
     eng = MainEngine(backend=DummyEngine(),
-                     engine_list=[OpenQASMEngine(_process)])
+                     engine_list=[OpenQASMEngine()])
     qubit1 = eng.allocate_qubit()
     qureg = eng.allocate_qureg(1)
     cmd = Command(eng, gate, (qubit1, ), controls=qureg)
     assert eng.is_available(cmd) == is_available
 
-    eng = MainEngine(backend=OpenQASMEngine(_process),
+    eng = MainEngine(backend=OpenQASMEngine(),
                      engine_list=[])
     qubit1 = eng.allocate_qubit()
     qureg = eng.allocate_qureg(1)
@@ -171,19 +161,14 @@ def test_openqasm_is_available_1control(gate, is_available):
                                                 (Rx(0.5), False),
                                                 (Ry(0.5), False)])
 def test_openqasm_is_available_2control(gate, is_available):
-    main_circuit = QuantumCircuit()
-
-    def _process(circuit):
-        main_circuit.extend(circuit)
-
     eng = MainEngine(backend=DummyEngine(),
-                     engine_list=[OpenQASMEngine(_process)])
+                     engine_list=[OpenQASMEngine()])
     qubit1 = eng.allocate_qubit()
     qureg = eng.allocate_qureg(2)
     cmd = Command(eng, gate, (qubit1, ), controls=qureg)
     assert eng.is_available(cmd) == is_available
 
-    eng = MainEngine(backend=OpenQASMEngine(_process), engine_list=[])
+    eng = MainEngine(backend=OpenQASMEngine(), engine_list=[])
     qubit1 = eng.allocate_qubit()
     qureg = eng.allocate_qureg(2)
     cmd = Command(eng, gate, (qubit1, ), controls=qureg)
@@ -191,12 +176,7 @@ def test_openqasm_is_available_2control(gate, is_available):
 
 
 def test_openqasm_test_qasm_single_qubit_gates():
-    main_circuit = QuantumCircuit()
-
-    def _process(circuit):
-        main_circuit.extend(circuit)
-
-    backend = OpenQASMEngine(_process)
+    backend = OpenQASMEngine()
     eng = MainEngine(backend=backend, engine_list=[])
     qubit = eng.allocate_qubit()
 
@@ -217,7 +197,7 @@ def test_openqasm_test_qasm_single_qubit_gates():
     Measure | qubit
     eng.flush()
 
-    qasm = [l for l in main_circuit.qasm().split('\n')[2:] if l]
+    qasm = [l for l in backend.circuit.qasm().split('\n')[2:] if l]
     assert qasm == [
         'qreg q0[1];', 'creg c0[1];', 'h q0[0];', 's q0[0];', 't q0[0];',
         'sdg q0[0];', 'tdg q0[0];', 'x q0[0];', 'y q0[0];', 'z q0[0];',
@@ -228,12 +208,7 @@ def test_openqasm_test_qasm_single_qubit_gates():
 
 
 def test_openqasm_test_qasm_single_qubit_gates_control():
-    main_circuit = QuantumCircuit()
-
-    def _process(circuit):
-        main_circuit.extend(circuit)
-
-    backend = OpenQASMEngine(_process)
+    backend = OpenQASMEngine()
     eng = MainEngine(backend=backend, engine_list=[])
     qubit = eng.allocate_qubit()
     ctrl = eng.allocate_qubit()
@@ -249,8 +224,7 @@ def test_openqasm_test_qasm_single_qubit_gates_control():
         Ph(0.5) | qubit
     eng.flush()
 
-    qasm = [l for l in main_circuit.qasm().split('\n')[2:] if l]
-    print(qasm)
+    qasm = [l for l in backend.circuit.qasm().split('\n')[2:] if l]
     assert qasm == [
         'qreg q0[1];', 'qreg q1[1];', 'creg c0[1];', 'creg c1[1];',
         'ch q1[0],q0[0];', 'cx q1[0],q0[0];', 'cy q1[0],q0[0];',
@@ -259,3 +233,28 @@ def test_openqasm_test_qasm_single_qubit_gates_control():
         'crz(0.500000000000000) q1[0],q0[0];',
         'cu1(-0.250000000000000) q1[0],q0[0];'
     ]
+
+def test_openqasm_test_qasm_single_qubit_gates_controls():
+    backend = OpenQASMEngine()
+    eng = MainEngine(backend=backend, engine_list=[], verbose=True)
+    qubit = eng.allocate_qubit()
+    ctrls = eng.allocate_qureg(2)
+
+    with Control(eng, ctrls):
+        X | qubit
+        NOT | qubit
+    eng.flush()
+
+    qasm = [l for l in backend.circuit.qasm().split('\n')[2:] if l]
+
+    assert qasm == [
+        'qreg q0[1];', 'qreg q1[1];', 'qreg q2[1];',
+        'creg c0[1];', 'creg c1[1];', 'creg c2[1];',
+        'ccx q1[0],q2[0],q0[0];',
+        'ccx q1[0],q2[0],q0[0];',
+    ]
+
+    with pytest.raises(RuntimeError):
+        with Control(eng, ctrls):
+            Y | qubit
+        eng.flush()
