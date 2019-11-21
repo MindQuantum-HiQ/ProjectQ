@@ -46,7 +46,7 @@ class OpenQASMEngine(BasicEngine):
                 process a qiskit.QuantumCircuit. This happens anytime a
                 FlushGate gets processed by the engine.
                 This function should accept a single argument:
-                qiskit.QuantumCircuit.
+                :py:class:`qiskit.QuantumCircuit`.
             qubit_id_mapping_redux (bool): If True, try to allocate new Qubit
                                            IDs to the next available qreg/creg
                                            (if any), otherwise create a new
@@ -102,7 +102,8 @@ class OpenQASMEngine(BasicEngine):
         Return the last OpenQASM circuit stored by this engine
 
         Note:
-            This is essentially the quantum circuit up to the last FlushGate.
+            This is essentially the quantum circuit up to the last
+            FlushGate. Assuming that no other gate was processed since then.
         """
         return self._openqasm_circuit
 

@@ -14,10 +14,12 @@
 """Tests for projectq.cengines._openqasm.py."""
 
 # This is required under Mac OS X when using virtual environments
+import os
 import platform
-if platform.system() == 'Darwin':
+if os.getenv('VIRTUAL_ENV') and platform.system() == 'Darwin':
     import matplotlib
-    matplotlib.use('Qt5Agg')
+    if matplotlib.get_backend() == 'MacOSX':
+        matplotlib.use('Qt5Agg')
 
 import pytest
 from qiskit import QuantumCircuit

@@ -22,6 +22,7 @@ The ProjectQ compiler engines package.
 	projectq.cengines.MainEngine
   projectq.cengines.SwapAndCNOTFlipper
 	projectq.cengines.TagRemover
+	projectq.cengines.OpenQASMEngine
 
 
 Module contents
