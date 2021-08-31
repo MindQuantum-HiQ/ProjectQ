@@ -88,6 +88,7 @@ repos:
         # This is a slow hook, so only run this if --hook-stage manual is passed
         stages: [manual]
         additional_dependencies: [pybind11>=2.6, numpy, requests, boto3, matplotlib, networkx, sympy,
+                                  qiskit-terra, pyparsing,
                                   pylint-secure-coding-standard]
       - id: pylint
         name: pylint-test-files
@@ -96,10 +97,26 @@ repos:
         args: ['--score=n']
         # This is a slow hook, so only run this if --hook-stage manual is passed
         stages: [manual]
-        additional_dependencies: [pybind11>=2.6, numpy, requests, boto3, matplotlib, networkx, sympy]
+        additional_dependencies: [pybind11>=2.6, numpy, requests, boto3, matplotlib, networkx, sympy,
+                                  qiskit-terra, pyparsing]
 
   - repo: https://github.com/mgedmin/check-manifest
     rev: '0.46'
     hooks:
       - id: check-manifest
         additional_dependencies: ['setuptools-scm', 'pybind11>=2.6']
+
+  - repo: https://github.com/Takishima/cmake-pre-commit-hooks/
+    rev: 'v1.4.0'
+    hooks:
+      - id: clang-format
+        args: [-i]
+      - id: clang-tidy
+        stages: [manual]
+        args: [-Bbuild, -B.pre-commit-build]
+        exclude: >-
+          (?x)^(
+            .*(scalar|vector)/kernel[0-9]+\.hpp|
+            .*third_party/.*|
+            .*\.cu
+          )$

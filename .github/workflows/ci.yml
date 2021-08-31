@@ -53,11 +53,12 @@ jobs:
     - name: Generate requirement file (Unix)
       if: runner.os != 'Windows'
       run: |
+        python setup.py gen_reqfile --include-extras=test,braket,qiskit,pyparsing
 
     - name: Generate requirement file (Windows)
       if: runner.os == 'Windows'
       run: |
-        python setup.py gen_reqfile --include-extras=test,braket
+        python setup.py gen_reqfile --include-extras=test,braket,qiskit,pyparsing
 
     - name: Prepare env
       run: |
@@ -70,10 +71,11 @@ jobs:
 
     - name: Build and install package (Unix)
       if: runner.os != 'Windows'
+      run: python -m pip install -ve .[braket,qiskit,pyparsing,test]
 
     - name: Build and install package (Windows)
       if: runner.os == 'Windows'
-      run: python -m pip install -ve .[braket,test]
+      run: python -m pip install -ve .[braket,qiskit,pyparsing,test]
 
     - name: Pytest
       run: |
@@ -143,7 +145,7 @@ jobs:
       run: python3 -m pip install --upgrade pybind11 flaky --prefer-binary
 
     - name: Build and install package
-      run: python3 -m pip install -ve .[braket,test]
+      run: python3 -m pip install -ve .[braket,qiskit,pyparsing,test]
 
     - name: Pytest
       run: |
@@ -187,7 +189,7 @@ jobs:
       run: python3 -m pip install --upgrade pybind11 flaky --prefer-binary
 
     - name: Build and install package
-      run: python3 -m pip install -ve .[braket,test]
+      run: python3 -m pip install -ve .[braket,qiskit,pyparsing,test]
 
     - name: Pytest
       run: |
@@ -253,11 +255,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python3 setup.py gen_reqfile --include-extras=test,braket
+        python3 setup.py gen_reqfile --include-extras=test,braket,qiskit,pyparsing
         python3 -m pip install -r requirements.txt --prefer-binary
 
     - name: Build and install package
-      run: python3 -m pip install -ve .[braket,test]
+      run: python3 -m pip install -ve .[braket,qiskit,pyparsing,test]
 
     - name: Pytest
       run: |
@@ -339,11 +341,11 @@ jobs:
 
     - name: Prepare env
       run: |
-        python setup.py gen_reqfile --include-extras=test,braket
+        python setup.py gen_reqfile --include-extras=test,braket,qiskit,pyparsing
         python -m pip install -r requirements.txt --prefer-binary
 
     - name: Build and install package
-      run: python -m pip install -ve .[braket,test]
+      run: python -m pip install -ve .[braket,qiskit,pyparsing,test]
 
     - name: Run all checks
       run: |

@@ -245,9 +245,16 @@ Library implementing support for plotting results using histogram graphs.
 ''',
     ),
     PackageDescription(
+        'libs.qasm',
+        desc='''
+Library implementing support for reading from OpenQASM files using either Qiskit or pyparsing.
+''',
+    ),
+    PackageDescription(
         'libs',
         desc='''
-The library collection of ProjectQ which, for now, consists of a tiny math library and a small library to print simulation results as histograms graphs.
+The library collection of ProjectQ which, for now, consists of a tiny math library, a small library to print simulation
+results as histograms graphs and some OpenQASM support library.
 Soon, more libraries will be added.
 ''',
     ),
