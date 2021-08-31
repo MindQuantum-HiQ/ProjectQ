@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2020 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -118,13 +119,14 @@ class MyGate(BasicGate):
         return str(self.__class__.__name__) + "(" + param_str + ")"
 
 
-def test_drawer_draw():
+@pytest.mark.parametrize('use_tex', (False, True))
+def test_drawer_draw(use_tex):
     old_draw = _drawer.to_draw
     _drawer.to_draw = _draw_subst
 
     backend = DummyEngine()
 
-    drawer = CircuitDrawerMatplotlib()
+    drawer = CircuitDrawerMatplotlib(use_tex=use_tex)
 
     eng = MainEngine(backend, [drawer])
     qureg = eng.allocate_qureg(3)
@@ -142,16 +144,29 @@ def test_drawer_draw():
 
     qubit_lines = drawer.draw()
 
-    assert qubit_lines == {
-        0: [('H', [0], []), ('X', [0], []), None, ('Swap', [0, 1], []), ('X', [0], [])],
-        1: [('H', [1], []), ('Rx(1.00)', [1], []), ('X', [1], [0]), None, None],
-        2: [
-            ('MyGate(1.20)', [2], []),
-            ('MyGate(1.23)', [2], []),
-            ('MyGate(1.23,2.35)', [2], []),
-            ('MyGate(1.23,aaaaa...,bbb,2.34)', [2], []),
-            None,
-        ],
-    }
+    if not use_tex:
+        assert qubit_lines == {
+            0: [('H', [0], []), ('X', [0], []), None, ('Swap', [0, 1], []), ('X', [0], [])],
+            1: [('H', [1], []), ('Rx(1.00)', [1], []), ('X', [1], [0]), None, None],
+            2: [
+                ('MyGate(1.20)', [2], []),
+                ('MyGate(1.23)', [2], []),
+                ('MyGate(1.23,2.35)', [2], []),
+                ('MyGate(1.23,aaaaa...,bbb,2.34)', [2], []),
+                None,
+            ],
+        }
+    else:
+        assert qubit_lines == {
+            0: [('H', [0], []), ('X', [0], []), None, ('Swap', [0, 1], []), ('X', [0], [])],
+            1: [('H', [1], []), (Rx(1).tex_str(), [1], []), ('X', [1], [0]), None, None],
+            2: [
+                ('MyGate(1.20)', [2], []),
+                ('MyGate(1.23)', [2], []),
+                ('MyGate(1.23,2.35)', [2], []),
+                ('MyGate(1.23,aaaaa...,bbb,2.34)', [2], []),
+                None,
+            ],
+        }
 
     _drawer.to_draw = old_draw

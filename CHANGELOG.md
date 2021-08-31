@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     ProjectQ.
 -   Support for parameterized quantum gates (e.g. Rx, Ry, Rz, QubitOperator, TimeEvolution, etc.)
 
+### Updated
+
+-   Added option to DrawerMatplotlib backend to enable/disable LaTeX output of symbols
+
 
 ## [0.7.0] - 2021-08-31
 

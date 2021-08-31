@@ -6,7 +6,7 @@
 import matplotlib.pyplot as plt
 
 from projectq import MainEngine
-from projectq.backends import CircuitDrawer
+from projectq.backends import CircuitDrawerMatplotlib
 from projectq.ops import (
     CNOT,
     QFT,
@@ -40,9 +40,8 @@ from projectq.ops import (
 def zoo_profile():
     """Generate and display the zoo of quantum gates."""
     # create a main compiler engine with a drawing backend
-    drawing_engine = CircuitDrawer()
+    drawing_engine = CircuitDrawerMatplotlib(use_tex=True)
     locations = {0: 1, 1: 2, 2: 0, 3: 3}
-    drawing_engine.set_qubit_locations(locations)
     main_eng = MainEngine(drawing_engine)
     qureg = main_eng.allocate_qureg(4)
 

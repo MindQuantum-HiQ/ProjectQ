@@ -29,9 +29,12 @@ from ._plot import to_draw
 # ==============================================================================
 
 
-def _format_gate_str(cmd):
+def _format_gate_str(cmd, use_tex):
     param_str = ''
-    gate_name = str(cmd.gate)
+    if use_tex and hasattr(cmd.gate, 'tex_str'):
+        gate_name = cmd.gate.tex_str()
+    else:
+        gate_name = str(cmd.gate)
     if '(' in gate_name:
         (gate_name, param_str) = re.search(r'(.+)\((.*)\)', gate_name).groups()
         params = re.findall(r'([^,]+)', param_str)
@@ -55,7 +58,7 @@ def _format_gate_str(cmd):
 class CircuitDrawerMatplotlib(BasicEngine):
     """CircuitDrawerMatplotlib is a compiler engine which using Matplotlib library for drawing quantum circuits."""
 
-    def __init__(self, accept_input=False, default_measure=0):
+    def __init__(self, accept_input=False, default_measure=0, use_tex=False):
         """
         Initialize a circuit drawing engine(mpl).
 
@@ -65,12 +68,15 @@ class CircuitDrawerMatplotlib(BasicEngine):
                 (0 or 1).
             default_measure (bool): Default value to use as measurement results if accept_input is False and there is
                 no underlying backend to register real measurement results.
+            use_tex (bool): Use TeX/LaTeX string instead of plain string representation when displaying gate names
+                Defaults to False.
         """
         super().__init__()
         self._accept_input = accept_input
         self._default_measure = default_measure
         self._map = {}
         self._qubit_lines = {}
+        self.use_tex = use_tex
 
     def is_available(self, cmd):
         """
@@ -131,7 +137,7 @@ class CircuitDrawerMatplotlib(BasicEngine):
         controls = [qubit.id for qubit in cmd.control_qubits]
 
         ref_qubit_id = targets[0]
-        gate_str = _format_gate_str(cmd)
+        gate_str = _format_gate_str(cmd, self.use_tex)
 
         # First find out what is the maximum index that this command might
         # have
