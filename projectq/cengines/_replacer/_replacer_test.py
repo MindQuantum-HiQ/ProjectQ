@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +19,6 @@ import pytest
 
 from projectq import MainEngine
 from projectq.cengines import DecompositionRule, DecompositionRuleSet, DummyEngine
-from projectq.cengines._replacer import _replacer
 from projectq.ops import (
     BasicGate,
     ClassicalInstructionGate,
@@ -29,6 +29,8 @@ from projectq.ops import (
     S,
     X,
 )
+
+from .. import _replacer
 
 
 def test_filter_engine():

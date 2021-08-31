@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,22 +16,33 @@
 
 """ProjectQ module containing all compiler engines."""
 
-from ._basics import BasicEngine, ForwarderEngine, LastEngineException  # isort:skip
-from ._cmdmodifier import CommandModifier  # isort:skip
-from ._basicmapper import BasicMapperEngine  # isort:skip
+import importlib
+import inspect
+import pkgutil
 
-from ._ibm5qubitmapper import IBM5QubitMapper
-from ._linearmapper import LinearMapper, return_swap_depth
-from ._main import MainEngine, NotYetMeasuredError, UnsupportedEngineError
-from ._manualmapper import ManualMapper
-from ._optimize import LocalOptimizer
-from ._replacer import (
-    AutoReplacer,
-    DecompositionRule,
-    DecompositionRuleSet,
-    InstructionFilter,
+# Allow extending this namespace.
+__path__ = pkgutil.extend_path(__path__, __name__)
+
+from ._core import (
+    BasicEngine,
+    BasicMapperEngine,
+    CommandModifier,
+    ForwarderEngine,
+    LastEngineException,
+    MainEngine,
+    NotYetMeasuredError,
+    return_swap_depth,
 )
-from ._swapandcnotflipper import SwapAndCNOTFlipper
-from ._tagremover import TagRemover
-from ._testengine import CompareEngine, DummyEngine
-from ._twodmapper import GridMapper
+
+from ._base import *  # isort:skip
+
+for (_, pkg_name, _) in pkgutil.iter_modules(path=__path__):
+    if pkg_name not in ('_core', '_base'):
+        imported_module = importlib.import_module('.' + pkg_name, package=__name__)
+
+        if hasattr(imported_module, '__all__'):
+            for symbol_name in imported_module.__all__:
+                globals().setdefault(symbol_name, getattr(imported_module, symbol_name))
+        else:
+            for attr_name in dir(imported_module):
+                globals().setdefault(attr_name, getattr(imported_module, attr_name))

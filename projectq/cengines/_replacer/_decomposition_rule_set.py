@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -52,7 +53,7 @@ class DecompositionRuleSet:
         Args:
             rule (DecompositionRuleGate): The decomposition rule to add.
         """
-        decomp_obj = _Decomposition(rule.gate_decomposer, rule.gate_recognizer)
+        decomp_obj = _Decomposition(rule.gate_decomposer, rule.gate_recognizer, rule.rule_priority)
         cls = rule.gate_class.__name__
         if cls not in self.decompositions:
             self.decompositions[cls] = []
@@ -75,7 +76,7 @@ class ModuleWithDecompositionRuleSet:  # pragma: no cover # pylint: disable=too-
 class _Decomposition:  # pylint: disable=too-few-public-methods
     """The Decomposition class can be used to register a decomposition rule (by calling register_decomposition)."""
 
-    def __init__(self, replacement_fun, recogn_fun):
+    def __init__(self, replacement_fun, recogn_fun, priority):
         """
         Initialize a Decomposition object.
 
@@ -112,6 +113,7 @@ class _Decomposition:  # pylint: disable=too-few-public-methods
         """
         self.decompose = replacement_fun
         self.check = recogn_fun
+        self.priority = priority
 
     def get_inverse_decomposition(self):
         """
@@ -132,4 +134,4 @@ class _Decomposition:  # pylint: disable=too-few-public-methods
         def recogn(cmd):
             return self.check(cmd.get_inverse())
 
-        return _Decomposition(decomp, recogn)
+        return _Decomposition(decomp, recogn, self.priority)

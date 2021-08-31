@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,8 +25,8 @@ Example:
 """
 
 from projectq.cengines import BasicEngine
-from projectq.ops import ClassicalInstructionGate, CtrlAll
-from projectq.types import BasicQubit
+from projectq.ops import ClassicalInstructionGate
+from projectq.types import BasicQubit, CtrlAll
 
 from ._compute import ComputeTag, UncomputeTag
 from ._util import drop_engine_after, insert_engine

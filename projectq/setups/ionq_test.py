@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,8 +17,8 @@
 
 import pytest
 
-from projectq.backends._exceptions import DeviceOfflineError
-from projectq.backends._ionq._ionq_mapper import BoundedQubitMapper
+from projectq.backends._base import DeviceOfflineError
+from projectq.backends._web._ionq._ionq_mapper import BoundedQubitMapper
 
 
 def test_basic_ionq_mapper(monkeypatch):

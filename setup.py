@@ -630,7 +630,7 @@ if not cpython:
         'WARNING: C/C++ extensions are not supported on some features are disabled (e.g. C++ simulator).',
         'Plain-Python build succeeded.',
     )
-elif os.environ.get('DISABLE_PROJECTQ_CEXT'):
+elif os.environ.get('DISABLE_HIQ_CEXT') or os.environ.get('HIQ_DISABLE_CEXT'):
     run_setup(False)
     important_msgs(
         'DISABLE_PROJECTQ_CEXT is set; not attempting to build C/C++ extensions.',

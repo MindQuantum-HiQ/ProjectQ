@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -22,7 +23,7 @@ controls). This file also defines the corresponding meta tags.
 
 from copy import deepcopy
 
-from projectq.cengines import BasicEngine, CommandModifier
+from projectq.cengines._core import BasicEngine, CommandModifier
 from projectq.ops import Allocate, Deallocate
 
 from ._exceptions import QubitManagementError

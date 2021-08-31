@@ -21,13 +21,17 @@ Please cite
 Contents
     * :ref:`tutorial`: Tutorial containing instructions on how to get started with ProjectQ.
     * :ref:`examples`: Example implementations of few quantum algorithms
+    * :ref:`extending`: How to write ProjectQ extensions
+    * :ref:`advanced`: Some help about more advanced topics
     * :ref:`code_doc`: The code documentation of ProjectQ.
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :hidden:
 
     tutorials
     examples
     projectq
+    projectq_extensions
+    advanced

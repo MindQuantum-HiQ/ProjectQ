@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,6 +14,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+"""Definition of classes to support gate decomposition using compiler engines."""
+
 from ._decomposition_rule import DecompositionRule, ThisIsNotAGateClassError
 from ._decomposition_rule_set import DecompositionRuleSet
 from ._replacer import AutoReplacer, InstructionFilter, NoGateDecompositionError
+
+__all__ = [
+    'DecompositionRule',
+    'DecompositionRuleSet',
+    'AutoReplacer',
+    'InstructionFilter',
+    'NoGateDecompositionError',
+    'ThisIsNotAGateClassError',
+]

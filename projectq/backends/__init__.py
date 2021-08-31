@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2020 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -26,15 +27,30 @@ This includes:
 * an interface to the IBM Quantum Experience chip (and simulator).
 * an interface to the AQT trapped ion system (and simulator).
 * an interface to the AWS Braket service decives (and simulators)
-* an interface to the IonQ trapped ionq hardware (and simulator).
+* an interface to the IonQ trapped ionq hardware (and simulator).0
 """
-from ._aqt import AQTBackend
-from ._awsbraket import AWSBraketBackend
-from ._circuits import CircuitDrawer, CircuitDrawerMatplotlib
-from ._exceptions import DeviceNotHandledError, DeviceOfflineError, DeviceTooSmall
-from ._ibm import IBMBackend
-from ._ionq import IonQBackend
-from ._printer import CommandPrinter
-from ._resource import ResourceCounter
-from ._sim import ClassicalSimulator, Simulator
-from ._unitary import UnitarySimulator
+
+import importlib
+import inspect
+import pkgutil
+import sys
+
+# Allow extending this namespace.
+__path__ = __import__('pkgutil').extend_path(__path__, __name__)
+
+
+from ._base import *
+from ._circuits import *
+from ._sim import *
+from ._web import *
+
+for (_, pkg_name, _) in pkgutil.iter_modules(path=__path__):
+    if pkg_name not in ('_base', '_circuits', '_sim', '_web'):
+        imported_module = importlib.import_module('.' + pkg_name, package=__name__)
+
+        if hasattr(imported_module, '__all__'):
+            for symbol_name in imported_module.__all__:
+                globals().setdefault(symbol_name, getattr(imported_module, symbol_name))
+        else:
+            for attr_name in dir(imported_module):
+                globals().setdefault(attr_name, getattr(imported_module, attr_name))

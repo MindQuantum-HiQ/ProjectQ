@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -26,8 +27,8 @@ Decompose the circuit into a Rx/Ry/Rz/H/CNOT gate set that will be translated in
 set.
 """
 
-from projectq.backends._exceptions import DeviceNotHandledError, DeviceOfflineError
-from projectq.backends._ibm._ibm_http_client import show_devices
+from projectq.backends._base import DeviceNotHandledError, DeviceOfflineError
+from projectq.backends._web._ibm._ibm_http_client import show_devices
 from projectq.cengines import (
     BasicMapperEngine,
     GridMapper,

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,5 +25,8 @@ Get started:
     or run on the IBM backend), Teleportation, Grover search, and
     Shor's algorithm for factoring.
 """
+
+# Allow extending this namespace.
+__path__ = __import__('pkgutil').extend_path(__path__, __name__)
 
 from projectq.cengines import MainEngine

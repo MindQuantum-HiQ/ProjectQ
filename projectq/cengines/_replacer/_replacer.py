@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -77,7 +78,7 @@ class InstructionFilter(BasicEngine):
         self.next_engine.receive(command_list)
 
 
-class AutoReplacer(BasicEngine):
+class AutoReplacer(BasicEngine):  # pylint: disable=too-few-public-methods
     """
     A compiler engine to automatically replace certain commands.
 
@@ -187,6 +188,9 @@ class AutoReplacer(BasicEngine):
 
                 if len(decomp_list) == 0:
                     raise NoGateDecompositionError("\nNo replacement found for " + str(cmd) + "!")
+
+                # Basic sort of rules based on their priority
+                decomp_list.sort(key=lambda rule: rule.priority, reverse=True)
 
                 # use decomposition chooser to determine the best decomposition
                 chosen_decomp = self._decomp_chooser(cmd, decomp_list)

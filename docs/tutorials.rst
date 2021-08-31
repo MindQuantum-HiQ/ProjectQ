@@ -9,27 +9,25 @@ Tutorial
 Getting started
 ---------------
 
-To start using ProjectQ, simply run
+To start using HiQ-ProjectQ, simply run
 
 .. code-block:: bash
 
-    python -m pip install --user projectq
-
-Since version 0.6.0, ProjectQ is available as pre-compiled binary wheels in addition to the traditional source package. These wheels should work on most platforms, provided that your processor supports AVX2 instructions. Should you encounter any troubles while installation ProjectQ in binary form, you can always try tom compile the project manually as described below. You may want to pass the `--no-binary projectq` flag to Pip during the installation to make sure that you are downloading the source package.
+    python -m pip install --user hiq-projectq
 
 Alternatively, you can also `clone/download <https://github.com/projectq-framework>`_ this repository (e.g., to your /home directory) and run
 
 .. code-block:: bash
 
-    cd /home/projectq
+    cd /home/hiq-projectq
     python -m pip install --user .
 
-ProjectQ comes with a high-performance quantum simulator written in C++. Please see the detailed OS specific installation instructions below to make sure that you are installing the fastest version.
+HiQ-ProjectQ comes with a high-performance quantum simulator written in C++. Please see the detailed OS specific installation instructions below to make sure that you are installing the fastest version.
 
 .. note::
     The setup will try to build a C++-Simulator, which is much faster than the Python implementation. If the C++ compilation were to fail, the setup will install a pure Python implementation of the simulator instead. The Python simulator should work fine for small examples (e.g., running Shor's algorithm for factoring 15 or 21).
 
-    If you want to skip the installation of the C++-Simulator altogether, you can define the ``DISABLE_PROJECTQ_CEXT`` environment variable to avoid any compilation steps.
+    If you want to skip the installation of the C++-Simulator altogether, you can define the ``HIQ_DISABLE_CEXT`` environment variable to avoid any compilation steps.
 
 .. note::
     If building the C++-Simulator does not work out of the box, consider specifying a different compiler. For example:
@@ -44,11 +42,11 @@ ProjectQ comes with a high-performance quantum simulator written in C++. Please 
     Please use pip version v6.1.0 or higher as this ensures that dependencies are installed in the `correct order <https://pip.pypa.io/en/stable/reference/pip_install/#installation-order>`_.
 
 .. note::
-    ProjectQ should be installed on each computer individually as the C++ simulator compilation creates binaries which are optimized for the specific hardware on which it is being installed (potentially using our AVX version and `-march=native`). Therefore, sharing the same ProjectQ installation across different hardware may cause some problems.
+    HiQ-ProjectQ should be installed on each computer individually as the C++ simulator compilation creates binaries which are optimized for the specific hardware on which it is being installed (potentially using our AVX or ARM NEON versions and `-march=native`). Therefore, sharing the same HiQ-ProjectQ installation across different hardware may cause some problems.
 
 **Install AWS Braket Backend requirement**
 
-AWS Braket Backend requires the use of the official AWS SDK for Python, Boto3. This is an extra requirement only needed if you plan to use the AWS Braket Backend. To install ProjectQ inluding this requirement you can include it in the installation instruction as
+AWS Braket Backend requires the use of the official AWS SDK for Python, Boto3. This is an extra requirement only needed if you plan to use the AWS Braket Backend. To install HiQ-ProjectQ inluding this requirement you can include it in the installation instruction as
 
 .. code-block:: bash
 
@@ -108,7 +106,7 @@ Detailed instructions and OS-specific hints
 
     It is easiest to install a pre-compiled version of Python, including numpy and many more useful packages. One way to do so is using, e.g., the Python 3.7 installers from `python.org <https://www.python.org/downloads>`_ or `ANACONDA <https://www.continuum.io/downloads>`_. Installing ProjectQ right away will succeed for the (slow) Python simulator. For a compiled version of the simulator, install the Visual C++ Build Tools and the Microsoft Windows SDK prior to doing a pip install. The built simulator will not support multi-threading due to the limited OpenMP support of the Visual Studio compiler.
 
-    If the Python executable is added to your PATH (option normally suggested at the end of the Python installation procedure), you can then open a cmdline window (WIN + R, type "cmd" and click *OK*) and enter the following in order to install ProjectQ:
+    If the Python executable is added to your PATH (option normally suggested at the end of the Python installation procedure), you can then open a cmdline window (WIN + R, type "cmd" and click *OK*) and enter the following in order to install HiQ-ProjectQ:
 
     .. code-block:: batch
 
@@ -120,7 +118,7 @@ Detailed instructions and OS-specific hints
 
 **macOS**:
 
-        Similarly to the other platforms, installing ProjectQ without the C++ simulator is really easy:
+        Similarly to the other platforms, installing HiQ-ProjectQ without the C++ simulator is really easy:
 
     .. code-block:: bash
 
@@ -172,7 +170,7 @@ Detailed instructions and OS-specific hints
 
         brew install python llvm
 
-    You should now be able to install ProjectQ with the C++ simulator using the following command:
+    You should now be able to install HiQ-ProjectQ with the C++ simulator using the following command:
 
     .. code-block:: bash
 
@@ -201,25 +199,25 @@ Detailed instructions and OS-specific hints
 
         sudo port install py37-pip
 
-    Next, we can install ProjectQ with the high performance simulator written in C++. First, we will need to install a suitable compiler with support for **C++11**, OpenMP, and instrinsics. The best option is to install clang 9.0 also using macports (note: gcc installed via macports does not work).
+    Next, we can install HiQ-ProjectQ with the high performance simulator written in C++. First, we will need to install a suitable compiler with support for **C++11**, OpenMP, and instrinsics. The best option is to install clang 9.0 also using macports (note: gcc installed via macports does not work).
 
     .. code-block:: bash
 
         sudo port install clang-9.0
 
-    ProjectQ is now installed by:
+    HiQ-ProjectQ is now installed by:
 
     .. code-block:: bash
 
-        env CC=clang-mp-9.0 env CXX=clang++-mp-9.0 /opt/local/bin/python3.7 -m pip install --user projectq
+        env CC=clang-mp-9.0 CXX=clang++-mp-9.0 /opt/local/bin/python3.7 -m pip install --user projectq
 
 
-The ProjectQ syntax
+The HiQ-ProjectQ syntax
 -------------------
 
-Our goal is to have an intuitive syntax in order to enable an easy learning curve. Therefore, ProjectQ features a lean syntax which is close to the mathematical notation used in physics.
+Our goal is to have an intuitive syntax in order to enable an easy learning curve. Therefore, HiQ-ProjectQ features a lean syntax which is close to the mathematical notation used in physics.
 
-For example, consider applying an x-rotation by an angle `theta` to a qubit. In ProjectQ, this looks as follows:
+For example, consider applying an x-rotation by an angle `theta` to a qubit. In HiQ-ProjectQ, this looks as follows:
 
 .. code-block:: python
 
@@ -229,12 +227,12 @@ whereas the corresponding notation in physics would be
 
 :math:`R_x(\theta) \; |\text{qubit}\rangle`
 
-Moreover, the `|`-operator separates the classical arguments (on the left) from the quantum arguments (on the right). Next, you will see a basic quantum program using this syntax. Further examples can be found in the docs (`Examples` in the panel on the left) and in the ProjectQ examples folder on `GitHub <https://github.com/ProjectQ-Framework/ProjectQ>`_.
+Moreover, the `|`-operator separates the classical arguments (on the left) from the quantum arguments (on the right). Next, you will see a basic quantum program using this syntax. Further examples can be found in the docs (`Examples` in the panel on the left) and in the HiQ-ProjectQ examples folder on `GitHub <https://github.com/HiQ-ProjectQ-Framework/HiQ-ProjectQ>`_.
 
 Basic quantum program
 ---------------------
 
-To check out the ProjectQ syntax in action and to see whether the installation worked, try to run the following basic example
+To check out the HiQ-ProjectQ syntax in action and to see whether the installation worked, try to run the following basic example
 
 .. code-block:: python
 

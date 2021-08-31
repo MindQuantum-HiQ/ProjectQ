@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,3 +18,6 @@
 
 from ._classical_simulator import ClassicalSimulator
 from ._simulator import Simulator
+from ._unitary import UnitarySimulator
+
+__all__ = ['Simulator', 'ClassicalSimulator', 'UnitarySimulator']

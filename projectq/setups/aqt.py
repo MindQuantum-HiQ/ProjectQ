@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2020 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -26,8 +27,8 @@ device.  Decompose the circuit into a Rx/Ry/Rxx gate set that will be
 translated in the backend in the Rx/Ry/MS gate set.
 """
 
-from projectq.backends._aqt._aqt_http_client import show_devices
-from projectq.backends._exceptions import DeviceNotHandledError, DeviceOfflineError
+from projectq.backends._base import DeviceNotHandledError, DeviceOfflineError
+from projectq.backends._web._aqt._aqt_http_client import show_devices
 from projectq.cengines import BasicMapperEngine
 from projectq.ops import Barrier, Rx, Rxx, Ry
 from projectq.setups import restrictedgateset

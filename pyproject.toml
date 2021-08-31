@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "pybind11>=2", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=42", "wheel", "pybind11>=2.6.2", "setuptools_scm[toml]>=3.4"]
 build-backend = "setuptools.build_meta"
 
 # ==============================================================================
@@ -27,6 +27,7 @@ build-backend = "setuptools.build_meta"
     '.travis.yml',
     'Jenkinsfile',
     '*.mo',
+    '.clang-tidy',
     '.clang-format',
     '.gitmodules',
     'requirements.txt',
@@ -38,6 +39,10 @@ build-backend = "setuptools.build_meta"
     'docs/*',
     'docs/images/*',
     'examples/*',
+    'scripts/*',
+    'toolchain/*',
+    '*.rst',
+    'logo.png',
     ]
 
 
@@ -63,17 +68,16 @@ build-backend = "setuptools.build_meta"
         'math',
         'cmath',
         'unicodedata',
-        'revkit'
     ]
     extension-pkg-allow-list = [
         'math',
         'cmath',
         'unicodedata',
-        'revkit'
     ]
 
     [tool.pylint.basic]
-    good-names = ['qb', 'id', 'i', 'j', 'k', 'N', 'op', 'X', 'Y', 'Z', 'R', 'C', 'CRz', 'Zero', 'One']
+    good-names = ['qb', 'id', 'i', 'j', 'k', 'N', 'op', 'Zero', 'One',
+                  'X', 'Y', 'Z', 'R', 'U', 'U1', 'U2', 'U3', 'fSim', 'fSimParam', 'fSimNum', 'C', 'CRz']
 
     [tool.pylint.format]
     max-line-length = 120
@@ -88,6 +92,7 @@ build-backend = "setuptools.build_meta"
     disable = [
          'expression-not-assigned',
          'pointless-statement',
+         'no-name-in-module',  # due to dynamic importing of symbols
          'fixme'
     ]
 
@@ -97,6 +102,7 @@ build-backend = "setuptools.build_meta"
 minversion = '6.0'
 addopts = '-pno:warnings'
 testpaths = ['projectq']
+norecursedirs = 'third_party'
 ignore-glob = ['*flycheck*.py']
 mock_use_standalone_module = true
 

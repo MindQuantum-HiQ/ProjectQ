@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,64 +14,21 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from . import (
-    amplitudeamplification,
-    arb1qubit2rzandry,
-    barrier,
-    carb1qubit2cnotrzandry,
-    cnot2cz,
-    cnot2rxx,
-    cnu2toffoliandcu,
-    controlstate,
-    crz2cxandrz,
-    entangle,
-    globalphase,
-    h2rx,
-    ph2r,
-    phaseestimation,
-    qft2crandhadamard,
-    qubitop2onequbit,
-    r2rzandph,
-    rx2rz,
-    ry2rz,
-    rz2rx,
-    sqrtswap2cnot,
-    stateprep2cnot,
-    swap2cnot,
-    time_evolution,
-    toffoli2cnotandtgate,
-    uniformlycontrolledr2cnot,
-)
+"""Definition of all basic gate decomposition rules."""
 
-all_defined_decomposition_rules = [
-    rule
-    for module in [
-        arb1qubit2rzandry,
-        barrier,
-        carb1qubit2cnotrzandry,
-        crz2cxandrz,
-        cnot2rxx,
-        cnot2cz,
-        cnu2toffoliandcu,
-        controlstate,
-        entangle,
-        globalphase,
-        h2rx,
-        ph2r,
-        qubitop2onequbit,
-        qft2crandhadamard,
-        r2rzandph,
-        rx2rz,
-        ry2rz,
-        rz2rx,
-        sqrtswap2cnot,
-        stateprep2cnot,
-        swap2cnot,
-        toffoli2cnotandtgate,
-        time_evolution,
-        uniformlycontrolledr2cnot,
-        phaseestimation,
-        amplitudeamplification,
-    ]
-    for rule in module.all_defined_decomposition_rules
-]
+import os
+import pkgutil
+import sys
+from importlib import import_module
+
+# Allow extending this namespace.
+__path__ = pkgutil.extend_path(__path__, __name__)
+
+
+all_defined_decomposition_rules = []
+for (_, name, _) in pkgutil.iter_modules([os.path.dirname(__file__)]):
+    if name.endswith('test'):
+        continue
+    imported_module = import_module('.' + name, package=__name__)
+    setattr(sys.modules[__name__], name, imported_module)
+    all_defined_decomposition_rules.extend(imported_module.all_defined_decomposition_rules)

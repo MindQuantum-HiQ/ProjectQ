@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-   HiQ-ProjectQ is now a namespace package.
+    This should provide better oportunities for customizations in the future without the need to merge all changes into
+    ProjectQ.
+
+
 ## [0.7.0] - 2021-08-31
 
 ### Added

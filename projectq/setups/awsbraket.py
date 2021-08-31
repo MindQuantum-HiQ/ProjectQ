@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -26,8 +27,8 @@ device.  Decompose the circuit into the available gate set for each device
 that will be used in the backend.
 """
 
-from projectq.backends._awsbraket._awsbraket_boto3_client import show_devices
-from projectq.backends._exceptions import DeviceNotHandledError, DeviceOfflineError
+from projectq.backends._base import DeviceNotHandledError, DeviceOfflineError
+from projectq.backends._web._awsbraket._awsbraket_boto3_client import show_devices
 from projectq.ops import (
     Barrier,
     H,

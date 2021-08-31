@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,7 +26,7 @@ class ThisIsNotAGateClassError(TypeError):
 class DecompositionRule:  # pylint: disable=too-few-public-methods
     """A rule for breaking down specific gates into sequences of simpler gates."""
 
-    def __init__(self, gate_class, gate_decomposer, gate_recognizer=lambda cmd: True):
+    def __init__(self, gate_class, gate_decomposer, gate_recognizer=lambda cmd: True, rule_priority=0):
         """
         Initialize a DecompositionRule object.
 
@@ -63,3 +64,4 @@ class DecompositionRule:  # pylint: disable=too-few-public-methods
         self.gate_class = gate_class
         self.gate_decomposer = gate_decomposer
         self.gate_recognizer = gate_recognizer
+        self.rule_priority = rule_priority

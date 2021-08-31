@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,8 +26,8 @@ from projectq.meta import (
     UncomputeTag,
     _control,
 )
-from projectq.ops import Command, CtrlAll, H, IncompatibleControlState, Rx, X
-from projectq.types import WeakQubitRef
+from projectq.ops import Command, H, IncompatibleControlState, Rx, X
+from projectq.types import CtrlAll, WeakQubitRef
 
 
 def test_canonical_representation():
