@@ -1,0 +1,5 @@
+Checks:          '*,-readability-named-parameter,-cppcoreguidelines-pro-type-reinterpret-cast,-llvmlibc*,-objc-*,-fuchsia-trailing-return,-fuchsia-overloaded-operator,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations,-fuchsia-statically-constructed-objects,-modernize-use-trailing-return-type,-llvm-header-guard,-cppcoreguidelines-pro-bounds-constant-array-index'
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     file

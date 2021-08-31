@@ -39,7 +39,7 @@ def _recognize_carb1qubit(cmd):
     """Recognize single controlled one qubit gates with a matrix."""
     if get_control_count(cmd) == 1:
         try:
-            return len(cmd.gate.matrix) == 2 and not cmd.gate.is_parametric()
+            return cmd.gate.matrix.shape[0] == 2 and not cmd.gate.is_parametric()
         except AttributeError:
             return False
     return False

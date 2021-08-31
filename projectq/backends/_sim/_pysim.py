@@ -373,6 +373,7 @@ class Simulator:
             ids (list): A list containing the qubit IDs to which to apply the gate.
             ctrlids (list): A list of control qubit IDs (i.e., the gate is only applied where these qubits are 1).
         """
+        matrix = _np.array(_np.split(_np.array(matrix), len(matrix) ** 0.5))
         mask = self._get_control_mask(ctrlids)
         if len(matrix) == 2:
             pos = self._map[ids[0]]
@@ -502,6 +503,13 @@ class Simulator:
         Only defined to provide the same interface as the C++ simulator.
         """
 
+    def select_backend(self, backend_type):
+        """
+        Provide a dummy implementation for selecting a C++ simulator backend.
+
+        Only defined to provide the same interface as the C++ simulator.
+        """
+
     def _apply_term(self, term, ids, ctrlids=None):
         """
         Apply a QubitOperator term to the state vector.
@@ -513,9 +521,9 @@ class Simulator:
             ids (list[int]): Term index to Qubit ID mapping
             ctrlids (list[int]): Control qubit IDs
         """
-        X = [[0.0, 1.0], [1.0, 0.0]]
-        Y = [[0.0, -1j], [1j, 0.0]]
-        Z = [[1.0, 0.0], [0.0, -1.0]]
+        X = [0.0, 1.0, 1.0, 0.0]
+        Y = [0.0, -1j, 1j, 0.0]
+        Z = [1.0, 0.0, 0.0, -1.0]
         gates = [X, Y, Z]
         if not ctrlids:
             ctrlids = []

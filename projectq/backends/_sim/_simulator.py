@@ -40,10 +40,12 @@ from projectq.types import WeakQubitRef
 
 FALLBACK_TO_PYSIM = False
 try:
+    from ._cppsim import SimBackend  # pylint: disable=unused-import
     from ._cppsim import Simulator as SimulatorBackend
 except ImportError:  # pragma: no cover
     from ._pysim import Simulator as SimulatorBackend
 
+    SimBackend = None
     FALLBACK_TO_PYSIM = True
 
 
@@ -115,11 +117,8 @@ class Simulator(BasicEngine):
             return False
 
         try:
-            matrix = cmd.gate.matrix
             # Allow up to 5-qubit gates
-            if len(matrix) > 2 ** 5:
-                return False
-            return True
+            return cmd.gate.matrix.shape[0] <= 2 ** 5
         except AttributeError:
             return False
 
@@ -329,6 +328,24 @@ class Simulator(BasicEngine):
         """
         return self._simulator.cheat()
 
+    def select_backend(self, backend_type):
+        """
+        Select a particular type of simulator backend. Only applicable to the C++ simulator.
+
+        Args:
+            backend_type (SimBackend): enum value describing the backend type
+                Currently the following values are valid:
+                  - ScalarSerial (no vector instructions, non-threaded)
+                  - ScalarThreaded (no vector instructions, threaded)
+                  - VectorSerial (with vector instructions, non-threaded)
+                  - VectorThreaded (with vector instruction, threaded)
+                  - OffloadNvidia (computations on a GPU using CUDA)
+                  - Auto (choose best available option)
+
+                Note that not all backend may be available on your machine.
+        """
+        self._simulator.select_backend(backend_type)
+
     def _handle(self, cmd):  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         """
         Handle all commands.
@@ -420,7 +437,9 @@ class Simulator(BasicEngine):
                         str(cmd.gate), int(math.log(len(cmd.gate.matrix), 2)), len(ids)
                     )
                 )
-            self._simulator.apply_controlled_gate(matrix.tolist(), ids, [qb.id for qb in cmd.control_qubits])
+            self._simulator.apply_controlled_gate(
+                [item for sublist in matrix.tolist() for item in sublist], ids, [qb.id for qb in cmd.control_qubits]
+            )
 
             if not self._gate_fusion:
                 self._simulator.run()

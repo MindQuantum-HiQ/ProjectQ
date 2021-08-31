@@ -1,0 +1,251 @@
+# ==============================================================================
+#
+# Copyright 2021 <Huawei Technologies Co., Ltd>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ==============================================================================
+
+if(UNIX)
+  set(CMAKE_NVCXX_OUTPUT_EXTENSION .o)
+else()
+  set(CMAKE_NVCXX_OUTPUT_EXTENSION .obj)
+endif()
+set(CMAKE_INCLUDE_FLAG_NVCXX "-I")
+
+# Set implicit links early so compiler-specific modules can use them.
+set(__IMPLICIT_LINKS)
+foreach(dir ${CMAKE_NVCXX_HOST_IMPLICIT_LINK_DIRECTORIES})
+  string(APPEND __IMPLICIT_LINKS " -L\"${dir}\"")
+endforeach()
+foreach(lib ${CMAKE_NVCXX_HOST_IMPLICIT_LINK_LIBRARIES})
+  if(${lib} MATCHES "/")
+    string(APPEND __IMPLICIT_LINKS " \"${lib}\"")
+  else()
+    string(APPEND __IMPLICIT_LINKS " -l${lib}")
+  endif()
+endforeach()
+
+# ==============================================================================
+
+# Load compiler-specific information.
+if(CMAKE_NVCXX_COMPILER_ID)
+  include(${CMAKE_CURRENT_LIST_DIR}/${CMAKE_NVCXX_COMPILER_ID}-NVCXX.cmake)
+endif()
+
+# ==============================================================================
+
+# Tell Makefile generator that nvcc does not support @<rspfile> syntax.
+set(CMAKE_NVCXX_USE_RESPONSE_FILE_FOR_INCLUDES 0)
+set(CMAKE_NVCXX_USE_RESPONSE_FILE_FOR_LIBRARIES 0)
+set(CMAKE_NVCXX_USE_RESPONSE_FILE_FOR_OBJECTS 0)
+
+if(NOT CMAKE_SHARED_LIBRARY_RUNTIME_NVCXX_FLAG)
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_NVCXX_FLAG ${CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG})
+endif()
+
+if(NOT CMAKE_SHARED_LIBRARY_RUNTIME_NVCXX_FLAG_SEP)
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_NVCXX_FLAG_SEP ${CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP})
+endif()
+
+if(NOT CMAKE_SHARED_LIBRARY_RPATH_LINK_NVCXX_FLAG)
+  set(CMAKE_SHARED_LIBRARY_RPATH_LINK_NVCXX_FLAG ${CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG})
+endif()
+
+if(NOT DEFINED CMAKE_EXE_EXPORTS_NVCXX_FLAG)
+  set(CMAKE_EXE_EXPORTS_NVCXX_FLAG ${CMAKE_EXE_EXPORTS_C_FLAG})
+endif()
+
+if(NOT DEFINED CMAKE_SHARED_LIBRARY_SONAME_NVCXX_FLAG)
+  set(CMAKE_SHARED_LIBRARY_SONAME_NVCXX_FLAG ${CMAKE_SHARED_LIBRARY_SONAME_C_FLAG})
+endif()
+
+if(NOT CMAKE_EXECUTABLE_RUNTIME_NVCXX_FLAG)
+  set(CMAKE_EXECUTABLE_RUNTIME_NVCXX_FLAG ${CMAKE_SHARED_LIBRARY_RUNTIME_NVCXX_FLAG})
+endif()
+
+if(NOT CMAKE_EXECUTABLE_RUNTIME_NVCXX_FLAG_SEP)
+  set(CMAKE_EXECUTABLE_RUNTIME_NVCXX_FLAG_SEP ${CMAKE_SHARED_LIBRARY_RUNTIME_NVCXX_FLAG_SEP})
+endif()
+
+if(NOT CMAKE_EXECUTABLE_RPATH_LINK_NVCXX_FLAG)
+  set(CMAKE_EXECUTABLE_RPATH_LINK_NVCXX_FLAG ${CMAKE_SHARED_LIBRARY_RPATH_LINK_NVCXX_FLAG})
+endif()
+
+if(NOT DEFINED CMAKE_SHARED_LIBRARY_LINK_NVCXX_WITH_RUNTIME_PATH)
+  set(CMAKE_SHARED_LIBRARY_LINK_NVCXX_WITH_RUNTIME_PATH ${CMAKE_SHARED_LIBRARY_LINK_C_WITH_RUNTIME_PATH})
+endif()
+
+# for most systems a module is the same as a shared library so unless the variable CMAKE_MODULE_EXISTS is set just copy
+# the values from the LIBRARY variables
+if(NOT CMAKE_MODULE_EXISTS)
+  set(CMAKE_SHARED_MODULE_NVCXX_FLAGS ${CMAKE_SHARED_LIBRARY_NVCXX_FLAGS})
+  set(CMAKE_SHARED_MODULE_CREATE_NVCXX_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_NVCXX_FLAGS})
+endif()
+
+# add the flags to the cache based on the initial values computed in the platform/*.cmake files use _INIT variables so
+# that this only happens the first time and you can set these flags in the cmake cache
+
+set(CMAKE_NVCXX_FLAGS_INIT "$ENV{NVCXXFLAGS} ${CMAKE_NVCXX_FLAGS_INIT}")
+# cmake-lint: disable=E1120
+separate_arguments(CMAKE_NVCXX_FLAGS_INIT)
+list(REMOVE_DUPLICATES CMAKE_NVCXX_FLAGS_INIT)
+include(nvhpc_helpers)
+nvhpc_sanitize_cc(CMAKE_NVCXX_FLAGS_INIT STRING ${CMAKE_NVCXX_FLAGS_INIT})
+
+cmake_initialize_per_config_variable(CMAKE_NVCXX_FLAGS "Flags used by the NVCXX compiler")
+
+set(CMAKE_NVCXX_LDFLAGS_INIT "$ENV{NVCXX_LDFLAGS} ${CMAKE_NVCXX_LDFLAGS_INIT}")
+separate_arguments(CMAKE_NVCXX_LDFLAGS_INIT)
+list(REMOVE_DUPLICATES CMAKE_NVCXX_LDFLAGS_INIT)
+nvhpc_sanitize_cc(CMAKE_NVCXX_LDFLAGS_INIT STRING ${CMAKE_NVCXX_LDFLAGS_INIT})
+
+string(STRIP "${CMAKE_NVCXX_LDFLAGS_INIT}" _INIT)
+set(CMAKE_NVCXX_LDFLAGS
+    "${_INIT}"
+    CACHE STRING "Extra flags used by the NVCXX compiler during linking")
+mark_as_advanced(CMAKE_NVCXX_LDFLAGS)
+
+if(CMAKE_NVCXX_STANDARD_LIBRARIES_INIT)
+  set(CMAKE_NVCXX_STANDARD_LIBRARIES
+      "${CMAKE_NVCXX_STANDARD_LIBRARIES_INIT}"
+      CACHE STRING "Libraries linked by default with all NVCXX applications.")
+  mark_as_advanced(CMAKE_NVCXX_STANDARD_LIBRARIES)
+endif()
+
+# NB: This will be fixed in a future cmake-lint version (>v0.6.13)
+#
+# cmake-lint: disable=W0106
+if(NOT CMAKE_NVCXX_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_NVCXX_COMPILER_LAUNCHER})
+  set(CMAKE_NVCXX_COMPILER_LAUNCHER
+      "$ENV{CMAKE_NVCXX_COMPILER_LAUNCHER}"
+      CACHE STRING "Compiler launcher for NVCXX.")
+endif()
+
+include(CMakeCommonLanguageInclude)
+
+# now define the following rules:
+#
+# * CMAKE_NVCXX_CREATE_PREPROCESSED_SOURCE
+# * CMAKE_NVCXX_CREATE_ASSEMBLY_SOURCE
+# * CMAKE_NVCXX_CREATE_SHARED_LIBRARY
+# * CMAKE_NVCXX_CREATE_SHARED_MODULE
+# * CMAKE_NVCXX_COMPILE_WHOLE_COMPILATION
+# * CMAKE_NVCXX_COMPILE_PTX_COMPILATION
+# * CMAKE_NVCXX_COMPILE_SEPARABLE_COMPILATION
+# * CMAKE_NVCXX_LINK_EXECUTABLE
+
+# Preprocessing and assembly rules.
+if(NOT CMAKE_NVCXX_CREATE_PREPROCESSED_SOURCE)
+  set(CMAKE_NVCXX_CREATE_PREPROCESSED_SOURCE
+      "<CMAKE_NVCXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
+endif()
+if(NOT CMAKE_NVCXX_CREATE_ASSEMBLY_SOURCE)
+  set(CMAKE_NVCXX_CREATE_ASSEMBLY_SOURCE
+      "<CMAKE_NVCXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
+endif()
+
+# create a shared library
+if(NOT CMAKE_NVCXX_CREATE_SHARED_LIBRARY)
+  set(CMAKE_NVCXX_CREATE_SHARED_LIBRARY
+      "<CMAKE_NVCXX_COMPILER> ${CMAKE_NVCXX_LDFLAGS} <CMAKE_SHARED_LIBRARY_NVCXX_FLAGS> <LINK_FLAGS> \
+<CMAKE_SHARED_LIBRARY_CREATE_NVCXX_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> \
+<LINK_LIBRARIES>${__IMPLICIT_LINKS}")
+endif()
+
+# create a shared module copy the shared library rule by default
+if(NOT CMAKE_NVCXX_CREATE_SHARED_MODULE)
+  set(CMAKE_NVCXX_CREATE_SHARED_MODULE ${CMAKE_NVCXX_CREATE_SHARED_LIBRARY})
+endif()
+
+# Create a static archive incrementally for large object file counts.
+if(NOT DEFINED CMAKE_NVCXX_ARCHIVE_CREATE)
+  set(CMAKE_NVCXX_ARCHIVE_CREATE "<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>")
+endif()
+if(NOT DEFINED CMAKE_NVCXX_ARCHIVE_APPEND)
+  set(CMAKE_NVCXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
+endif()
+if(NOT DEFINED CMAKE_NVCXX_ARCHIVE_FINISH)
+  set(CMAKE_NVCXX_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
+endif()
+
+if(NOT CMAKE_NVCXX_COMPILE_OBJECT)
+  set(CMAKE_NVCXX_COMPILE_OBJECT
+      "<CMAKE_NVCXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> <CMAKE_SHARED_LIBRARY_NVCXX_FLAGS> <SOURCE> -c -o <OBJECT> ")
+endif()
+
+# Specify how to compile when ptx has been requested
+if(NOT CMAKE_NVCXX_COMPILE_PTX_COMPILATION)
+  set(CMAKE_NVCXX_COMPILE_PTX_COMPILATION
+      "<CMAKE_NVCXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> ${_CMAKE_COMPILE_AS_NVCXX_FLAG} ${_CMAKE_NVCXX_PTX_FLAG} \
+<SOURCE> -o <OBJECT>")
+endif()
+
+# Specify how to compile when separable compilation has been requested
+if(NOT CMAKE_NVCXX_COMPILE_SEPARABLE_COMPILATION)
+  set(CMAKE_NVCXX_COMPILE_SEPARABLE_COMPILATION
+      "<CMAKE_NVCXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> ${_CMAKE_COMPILE_AS_NVCXX_FLAG} ${_CMAKE_NVCXX_DEVICE_CODE} \
+<SOURCE> -o <OBJECT>")
+endif()
+
+# Specify how to compile when whole compilation has been requested
+if(NOT CMAKE_NVCXX_COMPILE_WHOLE_COMPILATION)
+  set(CMAKE_NVCXX_COMPILE_WHOLE_COMPILATION
+      "<CMAKE_NVCXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> ${_CMAKE_COMPILE_AS_NVCXX_FLAG} -c <SOURCE> -o <OBJECT>")
+endif()
+
+# compile a cu file into an executable
+if(NOT CMAKE_NVCXX_LINK_EXECUTABLE)
+  set(CMAKE_NVCXX_LINK_EXECUTABLE "<CMAKE_NVCXX_COMPILER> ${CMAKE_NVCXX_LDFLAGS} <LINK_FLAGS> <OBJECTS> -o <TARGET> \
+<LINK_LIBRARIES>${__IMPLICIT_LINKS}")
+endif()
+
+# Add implicit host link directories that contain device libraries to the device link line.
+set(__IMPLICIT_DLINK_DIRS ${CMAKE_NVCXX_IMPLICIT_LINK_DIRECTORIES})
+if(__IMPLICIT_DLINK_DIRS)
+  list(REMOVE_ITEM __IMPLICIT_DLINK_DIRS ${CMAKE_NVCXX_HOST_IMPLICIT_LINK_DIRECTORIES})
+endif()
+set(__IMPLICIT_DLINK_FLAGS)
+foreach(dir ${__IMPLICIT_DLINK_DIRS})
+  if(EXISTS "${dir}/libcurand_static.a")
+    string(APPEND __IMPLICIT_DLINK_FLAGS " -L\"${dir}\"")
+  endif()
+endforeach()
+unset(__IMPLICIT_DLINK_DIRS)
+
+# These are used when linking relocatable (dc) cuda code
+if(NOT CMAKE_NVCXX_DEVICE_LINK_LIBRARY)
+  set(CMAKE_NVCXX_DEVICE_LINK_LIBRARY
+      "<CMAKE_NVCXX_COMPILER> ${CMAKE_NVCXX_LDFLAGS} <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> \
+${CMAKE_NVCXX_COMPILE_OPTIONS_PIC} ${_CMAKE_NVCXX_EXTRA_DEVICE_LINK_FLAGS} -shared -dlink <OBJECTS> -o <TARGET> \
+<LINK_LIBRARIES>${__IMPLICIT_DLINK_FLAGS}")
+endif()
+if(NOT CMAKE_NVCXX_DEVICE_LINK_EXECUTABLE)
+  set(CMAKE_NVCXX_DEVICE_LINK_EXECUTABLE
+      "<CMAKE_NVCXX_COMPILER> ${CMAKE_NVCXX_LDFLAGS} <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> \
+${CMAKE_NVCXX_COMPILE_OPTIONS_PIC} ${_CMAKE_NVCXX_EXTRA_DEVICE_LINK_FLAGS} -shared -dlink <OBJECTS> -o <TARGET> \
+<LINK_LIBRARIES>${__IMPLICIT_DLINK_FLAGS}")
+endif()
+
+# Used when device linking is handled by CMake.
+if(NOT CMAKE_NVCXX_DEVICE_LINK_COMPILE)
+  set(CMAKE_NVCXX_DEVICE_LINK_COMPILE
+      "<CMAKE_NVCXX_COMPILER> ${CMAKE_NVCXX_LDFLAGS} <FLAGS> -D__NVCXX_INCLUDE_COMPILER_INTERNAL_HEADERS__ \
+-D__NV_EXTRA_INITIALIZATION=\"\" -D__NV_EXTRA_FINALIZATION=\"\" -DREGISTERLINKBINARYFILE=\\\"<REGISTER_FILE>\\\" \
+-DFATBINFILE=\\\"<FATBINARY>\\\" ${_CMAKE_COMPILE_AS_NVCXX_FLAG} \
+-c \"${CMAKE_NVCXX_COMPILER_TOOLKIT_LIBRARY_ROOT}/bin/crt/link.stub\" -o <OBJECT>")
+endif()
+
+unset(__IMPLICIT_DLINK_FLAGS)
+
+set(CMAKE_NVCXX_INFORMATION_LOADED 1)

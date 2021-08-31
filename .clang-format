@@ -1,0 +1,74 @@
+BasedOnStyle: Google
+AccessModifierOffset: -4
+AlignConsecutiveMacros: true
+AlignEscapedNewlines: Right
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: false
+  AfterEnum: true
+  AfterExternBlock: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: Custom
+BreakBeforeConceptDeclarations: true
+BreakBeforeInheritanceComma: true
+BreakConstructorInitializers: BeforeComma
+ColumnLimit: 120
+CompactNamespaces: true
+FixNamespaceComments: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '"[[:alpha:]\/]*config\.hpp"'
+    Priority:        1
+  - Regex:           '[<"]tweedledum/([A-Za-z0-9.\/\-_])+[>"]'
+    Priority:        3
+  - Regex:           '"([A-Za-z0-9.\/\-_])+"'
+    Priority:        2
+  - Regex:           '<(catch2|boost|eigen)\/'
+    Priority:        4
+  - Regex:           '<symengine\/'
+    Priority:        5
+  - Regex:           '[<"]cuda[A-Za-z0-9.\/\-_]+[>"]'
+    Priority:        6
+  - Regex:           '[<"](driver_types.h)[>"]'
+    Priority:        6
+  - Regex:           '<(assert|complex|ctype|errno|fenv|float|inttypes|iso646|limits|locale|math|setjmp|signal|stdalign|stdarg|stdatomic|stdbool|stddef|stdint|stdio|stdlib|stdnoreturn|string|tdmath|threads|time|uchar|wchar|wctype)\.h>'
+    Priority:        20
+  - Regex:           '<[[:alpha:]_]+>'
+    Priority:        10
+  - Regex:           '<[[:alnum:]_\.]+'
+    Priority:        8
+IndentPPDirectives: AfterHash
+IndentRequires: true
+IndentWidth: 4
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: All
+PenaltyBreakAssignment: 40
+ReflowComments: true
+SortIncludes: true
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: true
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: false
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+Standard: c++17
+TabWidth: 4
+UseTab: Never
+WhitespaceSensitiveMacros: ['CLANG_DIAG_ON', 'CLANG_DIAG_OFF', 'GCC_DIAG_ON', 'GCC_DIAG_OFF', 'MSVC_DIAG_ON', 'MSVC_DIAG_OFF']

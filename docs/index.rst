@@ -23,6 +23,7 @@ Contents
     * :ref:`examples`: Example implementations of few quantum algorithms
     * :ref:`extending`: How to write ProjectQ extensions
     * :ref:`advanced`: Some help about more advanced topics
+    * :ref:`compilation`: Advanced compilation instructions (cross-compilation, etc.)
     * :ref:`code_doc`: The code documentation of ProjectQ.
 
 
@@ -35,3 +36,4 @@ Contents
     projectq
     projectq_extensions
     advanced
+    compilation

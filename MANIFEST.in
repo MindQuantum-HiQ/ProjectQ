@@ -7,4 +7,10 @@ include setup.py
 include setup.cfg
 include pyproject.toml
 
-recursive-include projectq *.py *.hpp *.cpp
+include CMakeLists.txt
+recursive-include cmake *.cmake *.cmake.in *.h *.cpp *.cpp.in
+recursive-include projectq *.py
+recursive-include projectq/backends/_sim *.py *.h *.hpp *.c *.cc *.cpp *.cu *.txt *.cmake *.cmake.in
+recursive-include tests *.txt *.hpp *.cpp
+
+global-exclude *_test.py

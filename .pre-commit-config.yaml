@@ -49,6 +49,14 @@ repos:
     hooks:
       - id: remove-tabs
 
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+        additional_dependencies: [pyyaml]
+      - id: cmake-lint
+        additional_dependencies: [pyyaml]
+
   - repo: https://github.com/PyCQA/isort
     rev: 5.9.2
     hooks:

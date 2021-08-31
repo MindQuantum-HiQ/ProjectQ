@@ -17,7 +17,7 @@
 """ProjectQ module dedicated to simulation"""
 
 from ._classical_simulator import ClassicalSimulator
-from ._simulator import Simulator
+from ._simulator import SimBackend, Simulator
 from ._unitary import UnitarySimulator
 
-__all__ = ['Simulator', 'ClassicalSimulator', 'UnitarySimulator']
+__all__ = ['Simulator', 'SimBackend', 'ClassicalSimulator', 'UnitarySimulator']

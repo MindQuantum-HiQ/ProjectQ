@@ -36,7 +36,7 @@ HiQ-ProjectQ comes with a high-performance quantum simulator written in C++. Ple
 
             env CC=g++-10 python -m pip install --user projectq
 
-    Please note that the compiler you specify must support at least **C++11**!
+    Please note that the compiler you specify must support at least **C++17**!
 
 .. note::
     Please use pip version v6.1.0 or higher as this ensures that dependencies are installed in the `correct order <https://pip.pypa.io/en/stable/reference/pip_install/#installation-order>`_.
@@ -56,13 +56,32 @@ AWS Braket Backend requires the use of the official AWS SDK for Python, Boto3. T
 Detailed instructions and OS-specific hints
 -------------------------------------------
 
+**All plaftorms**
+
+If you intend on developping new features for HiQ-ProjectQ, you might be interested to avoid continuously reinstalling HiQ-ProjectQ via pip everytime you make some modifications to the source code. In those cases, you might want to install HiQ-ProjectQ *once* using the *editable* installation option from pip:
+
+.. code-block:: bash
+
+     python3 -m pip install -e .
+
+Depending on your pip version and the options that you pass onto pip in addition to ``-e``, a CMake build directory will remain after the pip call. If you cannot find that directory, you can always generate it on your own:
+
+.. code-block:: bash
+
+    mkdir build
+    cd build
+    cmake /path/to/hiq-projectq -DIN_PLACE_BUILD=ON
+
+The key option to pass onto CMake is ``-DIN_PLACE_BUILD=ON`` since this will tell CMake to automatically place the compiled shared libraries within the HiQ-ProjectQ directory tree. For more information about the existing CMake options, please have a look :ref:`cmake`.
+
+
 **Ubuntu**:
 
     After having installed the build tools (for g++):
 
     .. code-block:: bash
 
-        sudo apt-get install build-essential
+        sudo apt-get install build-essential cmake
 
     You only need to install Python (and the package manager). For version 3, run
 
@@ -85,7 +104,7 @@ Detailed instructions and OS-specific hints
 
     .. code-block:: bash
 
-        sudo pacman -Syu gcc
+        sudo pacman -Syu gcc cmake
 
     You only need to install Python (and the package manager). For version 3, run
 
@@ -104,7 +123,7 @@ Detailed instructions and OS-specific hints
 
 **Windows**:
 
-    It is easiest to install a pre-compiled version of Python, including numpy and many more useful packages. One way to do so is using, e.g., the Python 3.7 installers from `python.org <https://www.python.org/downloads>`_ or `ANACONDA <https://www.continuum.io/downloads>`_. Installing ProjectQ right away will succeed for the (slow) Python simulator. For a compiled version of the simulator, install the Visual C++ Build Tools and the Microsoft Windows SDK prior to doing a pip install. The built simulator will not support multi-threading due to the limited OpenMP support of the Visual Studio compiler.
+    It is easiest to install a pre-compiled version of Python, including numpy and many more useful packages. One way to do so is using, e.g., the Python 3.7 installers from `python.org <https://www.python.org/downloads>`_ or `ANACONDA <https://www.continuum.io/downloads>`_. Installing HiQ-ProjectQ right away will succeed for the (slow) Python simulator. For a compiled version of the simulator, install the Visual C++ Build Tools and the Microsoft Windows SDK prior to doing a pip install. The built simulator will not support multi-threading due to the limited OpenMP support of the Visual Studio compiler. You will also need to install CMake on your system as HiQ-ProjectQ requires it for setting up the build process.
 
     If the Python executable is added to your PATH (option normally suggested at the end of the Python installation procedure), you can then open a cmdline window (WIN + R, type "cmd" and click *OK*) and enter the following in order to install HiQ-ProjectQ:
 
@@ -125,16 +144,14 @@ Detailed instructions and OS-specific hints
         python3 -m pip install --user projectq
 
 
-    In order to install the fast C++ simulator, we require that a C++ compiler is installed on your system. There are essentially three options you can choose from:
+    In order to install the fast C++ simulator, we require that a C++ compiler is installed on your system. There are essentially two options you can choose from:
 
-    1. Using the compiler provided by Apple through the XCode command line tools.
-    2. Using Homebrew
-    3. Using MacPorts
+    1. Using Homebrew
+    2. Using MacPorts
 
-    For both options 2 and 3, you will be required to first install the XCode command line tools
+    For both options 1 and 2, you will be required to first install the XCode command line tools
 
-
-    **Apple XCode command line tool**
+       **Apple XCode command line tool**
 
     Install the XCode command line tools by opening a terminal window and running the following command:
 
@@ -144,17 +161,6 @@ Detailed instructions and OS-specific hints
 
     Next, you will need to install Python and pip. See options 2 and 3 for information on how to install a newer python version with either Homebrew or MacPorts. Here, we are using the standard python which is preinstalled with macOS. Pip can be installed by:
 
-    .. code-block:: bash
-
-        sudo easy_install pip
-
-    Now, you can install ProjectQ with the C++ simulator using the standard command:
-
-    .. code-block:: bash
-
-        python3 -m pip install --user projectq
-
-    Note that the compiler provided by Apple is currently not able to compile ProjectQ's multi-threaded code.
 
         **Homebrew**
 
@@ -168,7 +174,7 @@ Detailed instructions and OS-specific hints
 
     .. code-block:: bash
 
-        brew install python llvm
+        brew install python llvm cmake
 
     You should now be able to install HiQ-ProjectQ with the C++ simulator using the following command:
 
@@ -185,7 +191,7 @@ Detailed instructions and OS-specific hints
 
     .. code-block:: bash
 
-        sudo port install python37
+        sudo port install python37 cmake
 
     It might show a warning that if you intend to use python from the terminal. In this case, you should also install
 

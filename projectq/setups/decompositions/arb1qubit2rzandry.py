@@ -49,7 +49,7 @@ def _recognize_arb1qubit(cmd):
     carb1qubit2cnotrzandry instead.
     """
     try:
-        return len(cmd.gate.matrix) == 2 and get_control_count(cmd) == 0 and not cmd.gate.is_parametric()
+        return cmd.gate.matrix.shape[0] == 2 and get_control_count(cmd) == 0 and not cmd.gate.is_parametric()
     except AttributeError:
         return False
 

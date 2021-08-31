@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Support for parameterized quantum gates (e.g. Rx, Ry, Rz, QubitOperator, TimeEvolution, etc.)
 -   Support for exporting HiQ-ProjectQ quantum circuits as JSON encoded strings
 -   Support for reading/writing quantum circuits using OpenQASM
+-   New implementation of the C++ simulator backend based on modern C++ (C++17)
+-   Preliminary support for GPU computations within the C++ simulator backend
 
 ### Updated
 

@@ -1,5 +1,3 @@
-# ==============================================================================
-
 addons:
   apt:
     sources: ['ubuntu-toolchain-r-test']
@@ -7,20 +5,31 @@ addons:
     packages:
       - gcc-9
       - g++-9
+      - cmake
       - build-essential
       - python3
       - python3-pip
 
   homebrew:
     update: false
-
-# ==============================================================================
+    packages:
+      - cmake
+      - git
+      - python
 
 env:
   global:
+    - CIBW_SKIP="cp27-* pp27-*"
+    - CIBW_MANYLINUX_X86_64_IMAGE=manylinux2010
+    - CIBW_MANYLINUX_I686_IMAGE=manylinux2010
     - OMP_NUM_THREADS=1
     - CC=gcc-9
     - CXX=g++-9
+  jobs:
+    - DO_DEPLOY=1
+    - DO_DEPLOY=0
+
+# ==============================================================================
 
 os: linux
 language: python
@@ -34,24 +43,44 @@ python:
 
 jobs:
   fast_finish: true
-  # Limit the number of builds to use less credits on Travis-CI
-  # include:
-  # - os: osx
-  #   osx_image: xcode12.2
-  #   language: shell
-  #   name: "Mac OS Python Homebrew"
-  #   env: CC=clang CXX=clang++
-  #   before_install:
-  #     - clang++ --version
-  # - os: windows
-  #   name: "Windows Python 3.8"
-  #   language: shell
-  #   before_install:
-  #     - unset CC CXX
-  #     - choco install python3 --version 3.8.8
-  #     - ln -s /c/Python38/python.exe /c/Python38/python3.exe
-  #     - python3 -m pip install --upgrade pip
-  #   env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+  exclude:
+  - python: 3.5
+    env: DO_DEPLOY=1
+  - python: 3.6
+    env: DO_DEPLOY=1
+  - python: 3.7
+    env: DO_DEPLOY=1
+  - python: 3.9
+    env: DO_DEPLOY=1
+  include:
+  - os: linux
+    arch: amd64
+    python: 3.8.3
+    env: DO_DEPLOY=1 DO_COVERALLS=1
+  - os: linux
+    arch: arm64
+    python: 3.8.3
+    env: DO_DEPLOY=1
+    before_install:
+      # work around cache dir owned by root (see https://travis-ci.community/t/7822/6)
+      - sudo chown -fR $USER:$GROUP ~/.cache/pip/wheels
+  - os: osx
+    osx_image: xcode12.2
+    language: shell
+    name: "Mac OS Python Homebrew"
+    env: CC=clang CXX=clang++ DO_DEPLOY=1
+    before_install:
+      - clang++ --version
+  - os: windows
+    name: "Windows Python 3.8"
+    language: shell
+    before_install:
+      - unset CC CXX
+      - choco install python3 --version 3.8.8
+      - ln -s /c/Python38/python.exe /c/Python38/python3.exe
+      - python3 -m pip install --upgrade pip
+    # env: PATH="/c/Python38:/c/Python38/Scripts:/c/Program\\ Files/git/usr/bin/:$PATH" WIN_DEPLOY=1
+    env: PATH=/c/Python38:/c/Python38/Scripts:$PATH WIN_DEPLOY=1
 
 # ==============================================================================
 # Installation and testing
@@ -61,7 +90,7 @@ install:
   - python3 -m pip install -U pip setuptools wheel
   - python3 -m pip install -U pybind11 flaky pytest-cov coveralls[yaml] boto3
   - python3 -m pip install -r requirements.txt
-  - python3 -m pip install -ve .
+  - python3 -m pip install -e .[qiskit,pyparsing]
 
 before_script:
   - "echo 'backend: Agg' > matplotlibrc"
@@ -69,7 +98,40 @@ before_script:
 script:
   - python3 -m pytest projectq --cov projectq -p no:warnings
 
+# ==============================================================================
+# Deployment (Linux and Mac OS)
+
+before_deploy:
+  - python3 -m pip install -U wheel cibuildwheel twine
+
+deploy:
+  - provider: script
+    script: bash $TRAVIS_BUILD_DIR/scripts/deploy.sh dist/ --skip-existing
+    cleanup: true
+    edge: true # opt in to dpl v2
+    on:
+      tags: true
+      condition: $DO_DEPLOY -eq 1 && -z $WIN_DEPLOY
+
+# ------------------------------------------------------------------------------
+# Special case for Windows
+# NB: cannot use deploy: because ruby uses bash from MinGW instead of git-bash
+#     to execute the script and escaping the spaces does not work
+
 after_success:
-  - coveralls
+  - |
+    if [[ -n $WIN_DEPLOY && -n "$TRAVIS_TAG" ]]; then
+      git stash --all
+      python3 -m pip install -U wheel cibuildwheel twine
+      python3 setup.py sdist
+      python3 -m cibuildwheel --output-dir dist/
+      python3 -m pip install twine
+      python3 -m twine check dist/*
+      python3 -m twine upload --skip-existing dist/*
+    fi
+  - |
+    if [[ -n $DO_COVERALLS ]]; then
+      coveralls
+    fi
 
 # ==============================================================================

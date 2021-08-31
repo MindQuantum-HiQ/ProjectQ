@@ -71,9 +71,22 @@ def test_is_cpp_simulator_present():
 def get_available_simulators():
     result = ["py_simulator"]
     try:
-        import projectq.backends._sim._cppsim  # noqa: F401
+        from projectq.backends._sim._cppsim import SimBackend as SimBackend
+        from projectq.backends._sim._cppsim import Simulator as CppSim
 
-        result.append("cpp_simulator")
+        for backend, name in (
+            (SimBackend.ScalarSerial, "ScalarSerial"),
+            (SimBackend.ScalarThreaded, "ScalarThreaded"),
+            (SimBackend.VectorSerial, "VectorSerial"),
+            (SimBackend.VectorThreaded, "VectorThreaded"),
+            (SimBackend.OffloadNVIDIA, "OffloadNVIDIA"),
+        ):
+            try:
+                sim = CppSim(1)
+                sim.select_backend(backend)
+                result.append(name)
+            except (ImportError, ValueError):
+                pass
     except ImportError:
         # The C++ simulator was either not installed or is misconfigured. Skip.
         pass
@@ -82,17 +95,19 @@ def get_available_simulators():
 
 @pytest.fixture(params=get_available_simulators())
 def sim(request):
-    if request.param == "cpp_simulator":
-        from projectq.backends._sim._cppsim import Simulator as CppSim
-
-        sim = Simulator(gate_fusion=True)
-        sim._simulator = CppSim(1)
-        return sim
     if request.param == "py_simulator":
         from projectq.backends._sim._pysim import Simulator as PySim
 
         sim = Simulator()
         sim._simulator = PySim(1)
+        return sim
+    else:
+        from projectq.backends._sim._cppsim import SimBackend as SimBackend
+        from projectq.backends._sim._cppsim import Simulator as CppSim
+
+        sim = Simulator(gate_fusion=True)
+        sim._simulator = CppSim(1)
+        sim.select_backend(getattr(SimBackend, request.param))
         return sim
 
 
@@ -133,7 +148,7 @@ class Mock1QubitGate(MatrixGate):
     @property
     def matrix(self):
         self.cnt += 1
-        return [[0, 1], [1, 0]]
+        return numpy.matrix([[0, 1], [1, 0]])
 
 
 class Mock6QubitGate(MatrixGate):
@@ -742,7 +757,7 @@ def test_simulator_convert_logical_to_mapped_qubits(sim):
 
 
 def test_simulator_constant_math_emulation():
-    if "cpp_simulator" not in get_available_simulators():
+    if len(get_available_simulators()) == 1:
         pytest.skip("No C++ simulator")
         return
 

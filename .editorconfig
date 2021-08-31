@@ -8,5 +8,11 @@ indent_style = space
 indent_size = 4
 
 [*.{yml,yaml}]
-indent_style = space
 indent_size = 2
+
+[{CMakeLists.txt,*.cmake}]
+indent_size = 2
+tab_width = 8
+
+[*.{h,hpp,hxx,c,cpp,cxx}]
+tab_width = 8
