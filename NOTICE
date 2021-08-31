@@ -1,3 +1,7 @@
 ProjectQ (www.projectq.ch)
 
 The first release of ProjectQ (v0.1) was developed by Thomas Haener (thomas@projectq.ch) and Damian S. Steiger (damian@projectq.ch) at ETH Zurich in 2016.
+
+Huawei Technologies Co., Ltd
+
+The software released under the name HiQ-ProjectQ is a fork of the original ProjectQ with some added functionalities and improvements. It was mainly developped by Damien Nguyen (damien1@huawei.com).
