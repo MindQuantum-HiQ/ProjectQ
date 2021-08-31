@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2018 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,10 +17,19 @@
 """Register a decomposition rule for a unitary QubitOperator to one qubit gates."""
 
 import cmath
+from numbers import Number
+
+import sympy
 
 from projectq.cengines import DecompositionRule
 from projectq.meta import Control, get_control_count
 from projectq.ops import Ph, QubitOperator, X, Y, Z
+
+
+def _phase(coefficient):
+    if isinstance(coefficient, Number):
+        return cmath.phase(coefficient)
+    return sympy.arg(coefficient)
 
 
 def _recognize_qubitop(cmd):
@@ -35,8 +45,7 @@ def _decompose_qubitop(cmd):
     qubit_op = cmd.gate
     with Control(eng, cmd.control_qubits):
         ((term, coefficient),) = qubit_op.terms.items()
-        phase = cmath.phase(coefficient)
-        Ph(phase) | qureg[0]
+        Ph(_phase(coefficient)) | qureg[0]
         for index, action in term:
             if action == "X":
                 X | qureg[index]

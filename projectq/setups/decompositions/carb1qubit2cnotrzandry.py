@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017, 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -38,12 +39,13 @@ def _recognize_carb1qubit(cmd):
     """Recognize single controlled one qubit gates with a matrix."""
     if get_control_count(cmd) == 1:
         try:
-            return len(cmd.gate.matrix) == 2
+            return len(cmd.gate.matrix) == 2 and not cmd.gate.is_parametric()
         except AttributeError:
             return False
     return False
 
 
+# TODO: make this work with parametric gates?
 def _test_parameters(matrix, a, b, c_half):  # pylint: disable=invalid-name
     """
     Build matrix V with parameters (a, b, c/2) and compares against matrix.

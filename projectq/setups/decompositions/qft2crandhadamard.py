@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -41,4 +42,4 @@ def _decompose_QFT(cmd):  # pylint: disable=invalid-name
 
 
 #: Decomposition rules
-all_defined_decomposition_rules = [DecompositionRule(QFT.__class__, _decompose_QFT)]
+all_defined_decomposition_rules = [DecompositionRule(QFT, _decompose_QFT)]

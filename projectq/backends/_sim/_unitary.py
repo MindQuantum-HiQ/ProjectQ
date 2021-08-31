@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -137,6 +138,9 @@ class UnitarySimulator(BasicEngine):
         Returns:
             True if it can be simulated and False otherwise.
         """
+        if cmd.gate.is_parametric():
+            return False
+
         if has_negative_control(cmd):
             return False
 

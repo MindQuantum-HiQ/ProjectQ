@@ -77,7 +77,7 @@ build-backend = "setuptools.build_meta"
 
     [tool.pylint.basic]
     good-names = ['qb', 'id', 'i', 'j', 'k', 'N', 'op', 'Zero', 'One',
-                  'X', 'Y', 'Z', 'R', 'U', 'U1', 'U2', 'U3', 'fSim', 'fSimParam', 'fSimNum', 'C', 'CRz']
+                  'X', 'Y', 'Z', 'R', 'U', 'U1', 'U2', 'U3', 'C', 'CRz']
 
     [tool.pylint.format]
     max-line-length = 120

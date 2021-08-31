@@ -302,7 +302,6 @@ class MainEngine(BasicEngine):  # pylint: disable=too-many-instance-attributes
             if self.verbose:
                 raise
             exc_type, exc_value, _ = sys.exc_info()
-            # try:
             last_line = traceback.format_exc().splitlines()
             compact_exception = exc_type(
                 str(exc_value) + '\n raised in:\n' + repr(last_line[-3]) + "\n" + repr(last_line[-2])
@@ -321,5 +320,12 @@ class MainEngine(BasicEngine):  # pylint: disable=too-many-instance-attributes
         if deallocate_qubits:
             while [qb for qb in self.active_qubits if qb is not None]:
                 qb = self.active_qubits.pop()
-                qb.__del__()
+                if isinstance(qb, WeakQubitRef):
+                    # WeakQubitRef -> directly call deallocate_qubit
+                    # NB: this typically only happens if this engine has
+                    #     received some parametric gates at some point through
+                    #     a call of ParametricGateBackend.send_to(...)
+                    self.deallocate_qubit(qb)
+                else:
+                    qb.__del__()
         self.receive([Command(self, FlushGate(), ([WeakQubitRef(self, -1)],))])

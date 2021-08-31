@@ -17,6 +17,9 @@
 """Definition of the time evolution gate."""
 
 import copy
+from numbers import Number
+
+from sympy.core.basic import Basic as SympyBase
 
 from ._basics import BasicGate
 from ._command import apply_command
@@ -65,20 +68,24 @@ class TimeEvolution(BasicGate):
             hamiltonian (QubitOperator): hamiltonian to evolve under.
 
         Raises:
-            TypeError: If time is not a numeric type and hamiltonian is not a QubitOperator.
+            TypeError: If time is not a numeric type or a sympy expression and hamiltonian is not a QubitOperator.
             NotHermitianOperatorError: If the input hamiltonian is not hermitian (only real coefficients).
         """
         super().__init__()
-        if not isinstance(time, (float, int)):
-            raise TypeError("time needs to be a (real) numeric type.")
+        if isinstance(time, (Number, SympyBase)):
+            if not isinstance(time, (float, int)):
+                raise TypeError("time needs to be a (real) numeric type.")
+        else:
+            raise TypeError('Time must be a (real) numeric type or a sympy ' 'expression!')
+
         if not isinstance(hamiltonian, QubitOperator):
             raise TypeError("hamiltonian needs to be QubitOperator object.")
         self.time = time
         self.hamiltonian = copy.deepcopy(hamiltonian)
-        for term in hamiltonian.terms:
-            if self.hamiltonian.terms[term].imag == 0:
-                self.hamiltonian.terms[term] = float(self.hamiltonian.terms[term].real)
-            else:
+        for term, coeff in hamiltonian.terms.items():
+            if isinstance(coeff, complex) and coeff.imag == 0:
+                self.hamiltonian.terms[term] = float(coeff.real)
+            elif not isinstance(coeff, (int, float, SympyBase)):
                 raise NotHermitianOperatorError("hamiltonian must be hermitian and hence only have real coefficients.")
 
     def get_inverse(self):
@@ -193,7 +200,7 @@ class TimeEvolution(BasicGate):
             new_term = tuple((new_index[index], action) for index, action in term)
             new_hamiltonian.terms[new_term] = self.hamiltonian.terms[term]
         new_gate = TimeEvolution(time=self.time, hamiltonian=new_hamiltonian)
-        new_qubits = [qubits[0][i] for i in non_trivial_qubits]
+        new_qubits = [qubits[0][i] for i in non_trivial_qubits]  # pylint disable=unsubscriptable-object
         # Apply new gate
         cmd = new_gate.generate_command(new_qubits)
         apply_command(cmd)

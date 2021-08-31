@@ -73,7 +73,7 @@ def make_decomposition_rule_set():
     def recognize_test(cmd):
         return True
 
-    result.add_decomposition_rule(DecompositionRule(SomeGate.__class__, decompose_test1, recognize_test))
+    result.add_decomposition_rule(DecompositionRule(SomeGate, decompose_test1, recognize_test))
 
     def decompose_test2(cmd):
         qb = cmd.qubits

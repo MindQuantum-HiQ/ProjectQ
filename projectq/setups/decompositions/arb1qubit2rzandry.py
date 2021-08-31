@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017, 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -48,11 +49,12 @@ def _recognize_arb1qubit(cmd):
     carb1qubit2cnotrzandry instead.
     """
     try:
-        return len(cmd.gate.matrix) == 2 and get_control_count(cmd) == 0
+        return len(cmd.gate.matrix) == 2 and get_control_count(cmd) == 0 and not cmd.gate.is_parametric()
     except AttributeError:
         return False
 
 
+# TODO: make this work with parametric gates?
 def _test_parameters(matrix, a, b_half, c_half, d_half):  # pylint: disable=invalid-name
     """
     Build matrix U with parameters (a, b/2, c/2, d/2) and compares against matrix.

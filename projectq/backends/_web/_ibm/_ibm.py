@@ -31,8 +31,11 @@ from projectq.ops import (
     H,
     Measure,
     Rx,
+    RxNum,
     Ry,
+    RyNum,
     Rz,
+    RzNum,
 )
 from projectq.types import WeakQubitRef
 
@@ -115,7 +118,9 @@ class IBMBackend(BasicEngine):  # pylint: disable=too-many-instance-attributes
         if get_control_count(cmd) == 1:
             return gate == NOT
         if get_control_count(cmd) == 0:
-            return gate == H or isinstance(gate, (Rx, Ry, Rz)) or gate in (Measure, Allocate, Deallocate, Barrier)
+            return (
+                gate == H or isinstance(gate, (RxNum, RyNum, RzNum)) or gate in (Measure, Allocate, Deallocate, Barrier)
+            )
         return False
 
     def get_qasm(self):

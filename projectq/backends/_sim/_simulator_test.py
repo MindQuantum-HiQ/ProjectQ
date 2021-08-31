@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -26,6 +27,7 @@ import pytest
 import scipy
 import scipy.sparse
 import scipy.sparse.linalg
+import sympy
 
 from projectq import MainEngine
 from projectq.backends import Simulator
@@ -341,6 +343,8 @@ def test_simulator_kqubit_exception(sim):
         KQubitGate() | qureg
     with pytest.raises(Exception):
         H | qureg
+    with pytest.raises(Exception):
+        Rx(sympy.Symbol('x')) | qureg[0]
 
 
 def test_simulator_probability(sim, mapper):

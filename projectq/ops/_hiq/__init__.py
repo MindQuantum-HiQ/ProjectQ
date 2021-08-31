@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
 #   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +13,21 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Definition of classes to support gate decomposition using compiler engines."""
+"""HiQ-ProjectQ gate classes."""
 
-from ._decomposition_rule import DecompositionRule
-from ._decomposition_rule_set import DecompositionRuleSet
-from ._replacer import AutoReplacer, InstructionFilter, NoGateDecompositionError
-
-__all__ = ['DecompositionRule', 'DecompositionRuleSet', 'AutoReplacer', 'InstructionFilter', 'NoGateDecompositionError']
+from ._fsimgate import fSim, fSimNum, fSimParam
+from ._unitary_gates import (
+    U1,
+    U2,
+    U3,
+    GeneralUnitary,
+    U,
+    U1Num,
+    U1Param,
+    U2Num,
+    U2Param,
+    U3Num,
+    U3Param,
+    UNum,
+    UParam,
+)

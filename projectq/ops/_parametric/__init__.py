@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
 #   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +13,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Definition of classes to support gate decomposition using compiler engines."""
+"""Parametric gate classes for ProjectQ"""
 
-from ._decomposition_rule import DecompositionRule
-from ._decomposition_rule_set import DecompositionRuleSet
-from ._replacer import AutoReplacer, InstructionFilter, NoGateDecompositionError
-
-__all__ = ['DecompositionRule', 'DecompositionRuleSet', 'AutoReplacer', 'InstructionFilter', 'NoGateDecompositionError']
+from ._parametric_base import (
+    InvalidAngle,
+    ParametricAngleGate,
+    ParametricGate,
+    ParametricGateCmplx,
+    ParametricGateReal,
+    ParametricPhaseGate,
+    ParametricRotationGate,
+)
+from ._parametric_two_angles import ParametricAngleGate2, ParametricPhaseGate2
+from ._unitary import ParametricGeneralUnitary, ParametricU2Gate, ParametricU3Gate

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2018 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -40,4 +41,4 @@ def _decompose_sqrtswap(cmd):
 
 
 #: Decomposition rules
-all_defined_decomposition_rules = [DecompositionRule(SqrtSwap.__class__, _decompose_sqrtswap)]
+all_defined_decomposition_rules = [DecompositionRule(SqrtSwap, _decompose_sqrtswap)]

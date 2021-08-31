@@ -29,8 +29,11 @@ from projectq.ops import (
     FlushGate,
     Measure,
     Rx,
+    RxNum,
     Rxx,
+    RxxNum,
     Ry,
+    RyNum,
 )
 from projectq.types import WeakQubitRef
 
@@ -118,7 +121,7 @@ class AQTBackend(BasicEngine):  # pylint: disable=too-many-instance-attributes
             cmd (Command): Command for which to check availability
         """
         if get_control_count(cmd) == 0:
-            if isinstance(cmd.gate, (Rx, Ry, Rxx)):
+            if isinstance(cmd.gate, (RxNum, RyNum, RxxNum)):
                 return True
         if cmd.gate in (Measure, Allocate, Deallocate, Barrier):
             return True

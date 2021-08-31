@@ -33,6 +33,53 @@ def main_engine():
     return MainEngine(backend=DummyEngine(), engine_list=[DummyEngine()])
 
 
+class DispatchGate(_basics.DispatchGateClass):
+    pass
+
+
+class GateOne(DispatchGate, _basics.BasicRotationGate):
+    pass
+
+
+class GateTwo(DispatchGate, _basics.BasicMathGate):
+    pass
+
+
+class OtherDispatchGate(DispatchGate):
+    pass
+
+
+class GateThree(OtherDispatchGate, _basics.BasicRotationGate):
+    pass
+
+
+class GateFour(OtherDispatchGate, _basics.BasicRotationGate):
+    pass
+
+
+def test_class_descriptor():
+    assert _basics.BasicGate.klass is _basics.BasicGate
+    assert _basics.BasicGate().klass is _basics.BasicGate
+
+    assert _basics.BasicRotationGate.klass is _basics.BasicRotationGate
+    assert _basics.BasicRotationGate(1).klass is _basics.BasicRotationGate
+
+    assert _basics.BasicMathGate.klass is _basics.BasicMathGate
+    assert _basics.BasicMathGate(lambda x: x).klass is _basics.BasicMathGate
+
+    assert DispatchGate.klass is DispatchGate
+    assert GateOne.klass is DispatchGate
+    assert GateOne(1).klass is DispatchGate
+    assert GateTwo.klass is DispatchGate
+    assert GateTwo(lambda x: x).klass is DispatchGate
+
+    assert OtherDispatchGate.klass is OtherDispatchGate
+    assert GateThree.klass is OtherDispatchGate
+    assert GateThree(1).klass is OtherDispatchGate
+    assert GateFour.klass is OtherDispatchGate
+    assert GateFour(1).klass is OtherDispatchGate
+
+
 def test_basic_gate_init():
     basic_gate = _basics.BasicGate()
     assert basic_gate.interchangeable_qubit_indices == []
@@ -141,6 +188,8 @@ def test_basic_gate_str():
     basic_gate = _basics.BasicGate()
     with pytest.raises(NotImplementedError):
         _ = str(basic_gate)
+    with pytest.raises(NotImplementedError):
+        _ = basic_gate.to_string()
 
 
 def test_basic_gate_hash():
@@ -162,6 +211,7 @@ def test_self_inverse_gate():
         (17.0, 4.4336293856408275),
         (-0.5 * math.pi, 3.5 * math.pi),
         (4 * math.pi, 0),
+        (4 * math.pi - _basics.ANGLE_TOLERANCE / 2, 0),
     ],
 )
 def test_basic_rotation_gate_init(input_angle, modulo_angle):
@@ -216,7 +266,7 @@ def test_basic_rotation_gate_is_identity():
     assert basic_rotation_gate5.is_identity()
 
 
-def test_basic_rotation_gate_comparison_and_hash():
+def test_basic_gate_comparison_and_hash():
     basic_rotation_gate1 = _basics.BasicRotationGate(0.5)
     basic_rotation_gate2 = _basics.BasicRotationGate(0.5)
     basic_rotation_gate3 = _basics.BasicRotationGate(0.5 + 4 * math.pi)

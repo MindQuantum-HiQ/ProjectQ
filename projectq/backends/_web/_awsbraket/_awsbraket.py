@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -29,9 +30,13 @@ from projectq.ops import (
     HGate,
     Measure,
     R,
+    RNum,
     Rx,
+    RxNum,
     Ry,
+    RyNum,
     Rz,
+    RzNum,
     Sdag,
     SGate,
     SqrtXGate,
@@ -114,9 +119,13 @@ class AWSBraketBackend(BasicEngine):  # pylint: disable=too-many-instance-attrib
             ZGate: 'z',
             HGate: 'h',
             R: 'phaseshift',
+            RNum: 'phaseshift',
             Rx: 'rx',
             Ry: 'ry',
             Rz: 'rz',
+            RxNum: 'rx',
+            RyNum: 'ry',
+            RzNum: 'rz',
             SGate: 's',  # NB: Sdag is 'si'
             TGate: 't',  # NB: Tdag is 'ti'
             SwapGate: 'swap',
@@ -176,10 +185,10 @@ class AWSBraketBackend(BasicEngine):  # pylint: disable=too-many-instance-attrib
                     isinstance(
                         gate,
                         (
-                            R,
-                            Rx,
-                            Ry,
-                            Rz,
+                            RNum,
+                            RxNum,
+                            RyNum,
+                            RzNum,
                             XGate,
                             YGate,
                             ZGate,
@@ -200,9 +209,9 @@ class AWSBraketBackend(BasicEngine):  # pylint: disable=too-many-instance-attrib
                     isinstance(
                         gate,
                         (
-                            Rx,
-                            Ry,
-                            Rz,
+                            RxNum,
+                            RyNum,
+                            RzNum,
                             XGate,
                             YGate,
                             ZGate,
@@ -228,10 +237,10 @@ class AWSBraketBackend(BasicEngine):  # pylint: disable=too-many-instance-attrib
                     isinstance(
                         gate,
                         (
-                            R,
-                            Rx,
-                            Ry,
-                            Rz,
+                            RNum,
+                            RxNum,
+                            RyNum,
+                            RzNum,
                             XGate,
                             YGate,
                             ZGate,

@@ -47,17 +47,24 @@ import cmath
 import math
 
 import numpy as np
+import sympy
+from sympy.core.basic import Basic as SympyBase
 
+from .._parametric import ParametricPhaseGate, ParametricRotationGate
 from ._basics import (
     BasicGate,
     BasicPhaseGate,
     BasicRotationGate,
     ClassicalInstructionGate,
+    DispatchGateClass,
     FastForwardingGate,
     SelfInverseGate,
 )
 from ._command import apply_command
 from ._metagates import get_inverse
+
+# This is mainly due to the class dispatching that happens for parametric gates
+# pylint: disable=too-many-ancestors,no-member
 
 
 class HGate(SelfInverseGate):
@@ -259,8 +266,50 @@ class EntangleGate(BasicGate):
 Entangle = EntangleGate()
 
 
-class Ph(BasicPhaseGate):
+class DispatchAngleGateClass(DispatchGateClass):
+    """Dispatch base class for angle gate classes (phase- and rotation- gates)."""
+
+    def __new__(cls, NumClass, ParamClass, angle):  # noqa: N803
+        """Create an AngleGateClass gate, dispatching to either a numeric or parametric implementation."""
+        if angle is not None:
+            if isinstance(angle, SympyBase):
+                # NB: here we do not consider sympy.Float and sympy.Integer as
+                # numbers since operation on them such as +, *, etc. will lead
+                # to expressions and not simple numbers
+                return super().__new__(ParamClass)
+            return super().__new__(NumClass)
+
+        # This statement is only for copy and deepcopy operations
+        return super().__new__(cls)
+
+    def __init__(self, angle):
+        """Initialize an AngleGateClass gate, dispatching to either a numeric or parametric implementation."""
+        # pylint: disable=useless-super-delegation,too-many-function-args
+        # This is tricky for the linters, as this will in practice call the __init__ method, not of DispatchGateClass
+        # but of the class defined in the real class. See e.g. PhParam and Ph below.
+        super().__init__(angle)
+
+
+# Dispatch class for R gates
+class Ph(DispatchAngleGateClass):
     """Phase gate (global phase)."""
+
+    def __new__(cls, angle=None):
+        """Create a Ph gate, dispatching to either a numeric or parametric implementation."""
+        return super().__new__(cls, PhNum, PhParam, angle)
+
+
+class PhParam(Ph, ParametricPhaseGate):
+    """Parametric phase gate realisation."""
+
+    @property
+    def matrix(self):
+        """Access to the matrix property of this gate."""
+        return sympy.Matrix([[sympy.exp(1j * self.angle), 0], [0, sympy.exp(1j * self.angle)]])
+
+
+class PhNum(Ph, BasicPhaseGate):
+    """Numeric phase gate realisation."""
 
     @property
     def matrix(self):
@@ -268,8 +317,31 @@ class Ph(BasicPhaseGate):
         return np.matrix([[cmath.exp(1j * self.angle), 0], [0, cmath.exp(1j * self.angle)]])
 
 
-class Rx(BasicRotationGate):
+# Dispatch class for Rx gates
+class Rx(DispatchAngleGateClass):
     """RotationX gate class."""
+
+    def __new__(cls, angle=None):
+        """Create an Rx gate, dispatching to either a numeric or parametric implementation."""
+        return super().__new__(cls, RxNum, RxParam, angle)
+
+
+class RxParam(Rx, ParametricRotationGate):
+    """Parametric rotationX gate class."""
+
+    @property
+    def matrix(self):
+        """Access to the matrix property of this gate."""
+        return sympy.Matrix(
+            [
+                [sympy.cos(0.5 * self.angle), -1j * sympy.sin(0.5 * self.angle)],
+                [-1j * sympy.sin(0.5 * self.angle), sympy.cos(0.5 * self.angle)],
+            ]
+        )
+
+
+class RxNum(Rx, BasicRotationGate):
+    """Numeric rotationX gate class."""
 
     @property
     def matrix(self):
@@ -282,8 +354,31 @@ class Rx(BasicRotationGate):
         )
 
 
-class Ry(BasicRotationGate):
+# Dispatch class for Ry gates
+class Ry(DispatchAngleGateClass):
     """RotationY gate class."""
+
+    def __new__(cls, angle=None):
+        """Create an Ry gate, dispatching to either a numeric or parametric implementation."""
+        return super().__new__(cls, RyNum, RyParam, angle)
+
+
+class RyParam(Ry, ParametricRotationGate):
+    """Parametric rotationY gate class."""
+
+    @property
+    def matrix(self):
+        """Access to the matrix property of this gate."""
+        return sympy.Matrix(
+            [
+                [sympy.cos(0.5 * self.angle), -sympy.sin(0.5 * self.angle)],
+                [sympy.sin(0.5 * self.angle), sympy.cos(0.5 * self.angle)],
+            ]
+        )
+
+
+class RyNum(Ry, BasicRotationGate):
+    """Numeric rotationY gate class."""
 
     @property
     def matrix(self):
@@ -296,8 +391,26 @@ class Ry(BasicRotationGate):
         )
 
 
-class Rz(BasicRotationGate):
+# Dispatch class for Rz gates
+class Rz(DispatchAngleGateClass):
     """RotationZ gate class."""
+
+    def __new__(cls, angle=None):
+        """Create an Rz gate, dispatching to either a numeric or parametric implementation."""
+        return super().__new__(cls, RzNum, RzParam, angle)
+
+
+class RzParam(Rz, ParametricRotationGate):
+    """Parametric rotationZ gate class."""
+
+    @property
+    def matrix(self):
+        """Access to the matrix property of this gate."""
+        return sympy.Matrix([[sympy.exp(-0.5 * 1j * self.angle), 0], [0, sympy.exp(0.5 * 1j * self.angle)]])
+
+
+class RzNum(Rz, BasicRotationGate):
+    """Numeric rotationZ gate class."""
 
     @property
     def matrix(self):
@@ -310,8 +423,33 @@ class Rz(BasicRotationGate):
         )
 
 
-class Rxx(BasicRotationGate):
+# Dispatch class for Rxx gates
+class Rxx(DispatchAngleGateClass):
     """RotationXX gate class."""
+
+    def __new__(cls, angle=None):
+        """Create an Rxx gate, dispatching to either a numeric or parametric implementation."""
+        return super().__new__(cls, RxxNum, RxxParam, angle)
+
+
+class RxxParam(Rxx, ParametricRotationGate):
+    """Parametric rotationXX gate class."""
+
+    @property
+    def matrix(self):
+        """Access to the matrix property of this gate."""
+        return sympy.Matrix(
+            [
+                [sympy.cos(0.5 * self.angle), 0, 0, -1j * sympy.sin(0.5 * self.angle)],
+                [0, sympy.cos(0.5 * self.angle), -1j * sympy.sin(0.5 * self.angle), 0],
+                [0, -1j * sympy.sin(0.5 * self.angle), sympy.cos(0.5 * self.angle), 0],
+                [-1j * sympy.sin(0.5 * self.angle), 0, 0, sympy.cos(0.5 * self.angle)],
+            ]
+        )
+
+
+class RxxNum(Rxx, BasicRotationGate):
+    """Numeric rotationXX gate class."""
 
     @property
     def matrix(self):
@@ -326,8 +464,33 @@ class Rxx(BasicRotationGate):
         )
 
 
-class Ryy(BasicRotationGate):
+# Dispatch class for Ryy gates
+class Ryy(DispatchAngleGateClass):
     """RotationYY gate class."""
+
+    def __new__(cls, angle=None):
+        """Create an Ryy gate, dispatching to either a numeric or parametric implementation."""
+        return super().__new__(cls, RyyNum, RyyParam, angle)
+
+
+class RyyParam(Ryy, ParametricRotationGate):
+    """Parametric rotationYY gate class."""
+
+    @property
+    def matrix(self):
+        """Access to the matrix property of this gate."""
+        return sympy.Matrix(
+            [
+                [sympy.cos(0.5 * self.angle), 0, 0, 1j * sympy.sin(0.5 * self.angle)],
+                [0, sympy.cos(0.5 * self.angle), -1j * sympy.sin(0.5 * self.angle), 0],
+                [0, -1j * sympy.sin(0.5 * self.angle), sympy.cos(0.5 * self.angle), 0],
+                [1j * sympy.sin(0.5 * self.angle), 0, 0, sympy.cos(0.5 * self.angle)],
+            ]
+        )
+
+
+class RyyNum(Ryy, BasicRotationGate):
+    """Numeric rotationYY gate class."""
 
     @property
     def matrix(self):
@@ -342,8 +505,33 @@ class Ryy(BasicRotationGate):
         )
 
 
-class Rzz(BasicRotationGate):
+# Dispatch class for Rzz gates
+class Rzz(DispatchAngleGateClass):
     """RotationZZ gate class."""
+
+    def __new__(cls, angle=None):
+        """Create an Rzz gate, dispatching to either a numeric or parametric implementation."""
+        return super().__new__(cls, RzzNum, RzzParam, angle)
+
+
+class RzzParam(Rzz, ParametricRotationGate):
+    """Parametric rotationZZ gate class."""
+
+    @property
+    def matrix(self):
+        """Access to the matrix property of this gate."""
+        return sympy.Matrix(
+            [
+                [sympy.exp(-0.5 * 1j * self.angle), 0, 0, 0],
+                [0, sympy.exp(0.5 * 1j * self.angle), 0, 0],
+                [0, 0, sympy.exp(0.5 * 1j * self.angle), 0],
+                [0, 0, 0, sympy.exp(-0.5 * 1j * self.angle)],
+            ]
+        )
+
+
+class RzzNum(Rzz, BasicRotationGate):
+    """Numeric rotationZZ gate class."""
 
     @property
     def matrix(self):
@@ -358,8 +546,26 @@ class Rzz(BasicRotationGate):
         )
 
 
-class R(BasicPhaseGate):
+# Dispatch class for R gates
+class R(DispatchAngleGateClass):
     """Phase-shift gate (equivalent to Rz up to a global phase)."""
+
+    def __new__(cls, angle=None):
+        """Create an R gate, dispatching to either a numeric or parametric implementation."""
+        return super().__new__(cls, RNum, RParam, angle)
+
+
+class RParam(R, ParametricPhaseGate):
+    """Parametric phase-shift gate (equivalent to Rz up to a global phase)."""
+
+    @property
+    def matrix(self):
+        """Access to the matrix property of this gate."""
+        return sympy.Matrix([[1, 0], [0, sympy.exp(1j * self.angle)]])
+
+
+class RNum(R, BasicPhaseGate):
+    """Numeric phase-shift gate (equivalent to Rz up to a global phase)."""
 
     @property
     def matrix(self):

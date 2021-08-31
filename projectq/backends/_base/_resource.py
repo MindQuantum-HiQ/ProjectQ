@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -120,7 +121,7 @@ class ResourceCounter(BasicEngine):
 
         ctrl_cnt = get_control_count(cmd)
         gate_description = (cmd.gate, ctrl_cnt)
-        gate_class_description = (cmd.gate.__class__, ctrl_cnt)
+        gate_class_description = (cmd.gate.klass, ctrl_cnt)
 
         try:
             self.gate_counts[gate_description] += 1
@@ -144,23 +145,21 @@ class ResourceCounter(BasicEngine):
             gate_class_list = []
             for gate_class_description, num in self.gate_class_counts.items():
                 gate_class, ctrl_cnt = gate_class_description
-                gate_class_name = ctrl_cnt * "C" + gate_class.__name__
-                gate_class_list.append(gate_class_name + " : " + str(num))
+                gate_class_list.append('{}{} : {}'.format(ctrl_cnt * "C", gate_class.__name__, num))
 
             gate_list = []
             for gate_description, num in self.gate_counts.items():
                 gate, ctrl_cnt = gate_description
-                gate_name = ctrl_cnt * "C" + str(gate)
-                gate_list.append(gate_name + " : " + str(num))
+                gate_list.append('{}{} : {}'.format(ctrl_cnt * "C", gate, num))
 
-            return (
-                "Gate class counts:\n    "
-                + "\n    ".join(sorted(gate_class_list))
-                + "\n\nGate counts:\n    "
-                + "\n    ".join(sorted(gate_list))
-                + "\n\nMax. width (number of qubits) : "
-                + str(self.max_width)
-                + "."
+            return ''.join(
+                [
+                    "Gate class counts:\n    ",
+                    "\n    ".join(sorted(gate_class_list)),
+                    "\n\nGate counts:\n    ",
+                    "\n    ".join(sorted(gate_list)),
+                    "\n\nMax. width (number of qubits) : {}.".format(self.max_width),
+                ]
             )
         return "(No quantum resources used)"
 

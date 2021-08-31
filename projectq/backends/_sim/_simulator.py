@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017, 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -107,6 +108,10 @@ class Simulator(BasicEngine):
             or isinstance(cmd.gate, (BasicMathGate, TimeEvolution))
         ):
             return True
+
+        if cmd.gate.is_parametric():
+            return False
+
         try:
             matrix = cmd.gate.matrix
             # Allow up to 5-qubit gates

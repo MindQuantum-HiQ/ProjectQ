@@ -17,13 +17,50 @@
 
 import cmath
 import math
+from copy import deepcopy
 
 import numpy as np
 import pytest
+import sympy
+from sympy.core.basic import Basic as SympyBase
 
 from projectq import MainEngine
 
+from .._parametric import _parametric_base as _param
 from . import _gates, _metagates
+
+
+def test_class_descriptor():
+    assert _gates.HGate.klass is _gates.HGate
+    assert _gates.H.klass is _gates.HGate
+
+    assert _gates.Ph.klass is _gates.Ph
+    assert _gates.Ph(1).klass is _gates.Ph
+    assert _gates.Ph(sympy.Symbol('x')).klass is _gates.Ph
+
+    assert _gates.Rx.klass is _gates.Rx
+    assert _gates.Rx(1).klass is _gates.Rx
+    assert _gates.Rx(sympy.Symbol('x')).klass is _gates.Rx
+
+    assert _gates.Ry.klass is _gates.Ry
+    assert _gates.Ry(1).klass is _gates.Ry
+    assert _gates.Ry(sympy.Symbol('y')).klass is _gates.Ry
+
+    assert _gates.Rz.klass is _gates.Rz
+    assert _gates.Rz(1).klass is _gates.Rz
+    assert _gates.Rz(sympy.Symbol('z')).klass is _gates.Rz
+
+    assert _gates.Rxx.klass is _gates.Rxx
+    assert _gates.Rxx(1).klass is _gates.Rxx
+    assert _gates.Rxx(sympy.Symbol('x')).klass is _gates.Rxx
+
+    assert _gates.Ryy.klass is _gates.Ryy
+    assert _gates.Ryy(1).klass is _gates.Ryy
+    assert _gates.Ryy(sympy.Symbol('x')).klass is _gates.Ryy
+
+    assert _gates.Rzz.klass is _gates.Rzz
+    assert _gates.Rzz(1).klass is _gates.Rzz
+    assert _gates.Rzz(sympy.Symbol('x')).klass is _gates.Rzz
 
 
 def test_h_gate():
@@ -80,6 +117,7 @@ def test_t_gate():
 def test_sqrtx_gate():
     gate = _gates.SqrtXGate()
     assert str(gate) == "SqrtX"
+    assert gate.tex_str() == r"$\sqrt{X}$"
     assert np.array_equal(gate.matrix, np.matrix([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]]))
     assert np.array_equal(gate.matrix * gate.matrix, np.matrix([[0j, 1], [1, 0]]))
     assert isinstance(_gates.SqrtX, _gates.SqrtXGate)
@@ -119,107 +157,126 @@ def test_engangle_gate():
     assert isinstance(_gates.Entangle, _gates.EntangleGate)
 
 
-@pytest.mark.parametrize("angle", [0, 0.2, 2.1, 4.1, 2 * math.pi, 4 * math.pi])
-def test_rx(angle):
-    gate = _gates.Rx(angle)
-    expected_matrix = np.matrix(
-        [
-            [math.cos(0.5 * angle), -1j * math.sin(0.5 * angle)],
-            [-1j * math.sin(0.5 * angle), math.cos(0.5 * angle)],
-        ]
-    )
+def _cos(angle):
+    if isinstance(angle, SympyBase):
+        return sympy.cos(angle)
+    return math.cos(angle)
+
+
+def _sin(angle):
+    if isinstance(angle, SympyBase):
+        return sympy.sin(angle)
+    return math.sin(angle)
+
+
+def _exp(arg):
+    if isinstance(arg, SympyBase):
+        return sympy.exp(arg)
+    return cmath.exp(arg)
+
+
+def create_matrix(angle, matrix_gen):
+    if isinstance(angle, SympyBase):
+        return sympy.Matrix(matrix_gen(angle))
+    return np.array(matrix_gen(angle))
+
+
+def angle_idfn(val):
+    if isinstance(val, SympyBase):
+        return 'sym({})'.format(val)
+    return 'num({})'.format(val)
+
+
+@pytest.mark.parametrize(
+    "klass, matrix_gen",
+    [
+        (_gates.Ph, lambda angle: [[_exp(1j * angle), 0], [0, _exp(1j * angle)]]),
+        (_gates.R, lambda angle: [[1, 0], [0, _exp(1.0j * angle)]]),
+        (
+            _gates.Rx,
+            lambda angle: [[_cos(0.5 * angle), -1j * _sin(0.5 * angle)], [-1j * _sin(0.5 * angle), _cos(0.5 * angle)]],
+        ),
+        (_gates.Ry, lambda angle: [[_cos(0.5 * angle), -_sin(0.5 * angle)], [_sin(0.5 * angle), _cos(0.5 * angle)]]),
+        (_gates.Rz, lambda angle: [[_exp(-0.5 * 1j * angle), 0], [0, _exp(0.5 * 1j * angle)]]),
+        (
+            _gates.Rxx,
+            lambda angle: [
+                [_cos(0.5 * angle), 0, 0, -1j * _sin(0.5 * angle)],
+                [0, _cos(0.5 * angle), -1j * _sin(0.5 * angle), 0],
+                [0, -1j * _sin(0.5 * angle), _cos(0.5 * angle), 0],
+                [-1j * _sin(0.5 * angle), 0, 0, _cos(0.5 * angle)],
+            ],
+        ),
+        (
+            _gates.Ryy,
+            lambda angle: [
+                [_cos(0.5 * angle), 0, 0, 1j * _sin(0.5 * angle)],
+                [0, _cos(0.5 * angle), -1j * _sin(0.5 * angle), 0],
+                [0, -1j * _sin(0.5 * angle), _cos(0.5 * angle), 0],
+                [1j * _sin(0.5 * angle), 0, 0, _cos(0.5 * angle)],
+            ],
+        ),
+        (
+            _gates.Rzz,
+            lambda angle: [
+                [_exp(-0.5 * 1j * angle), 0, 0, 0],
+                [0, _exp(0.5 * 1j * angle), 0, 0],
+                [0, 0, _exp(0.5 * 1j * angle), 0],
+                [0, 0, 0, _exp(-0.5 * 1j * angle)],
+            ],
+        ),
+    ],
+)
+@pytest.mark.parametrize(
+    "angle",
+    [
+        0,
+        0.2,
+        2.1,
+        4.1,
+        2 * math.pi,
+        4 * math.pi,
+        sympy.Float(0),
+        sympy.Float(2.1),
+        2 * sympy.pi,
+        4 * sympy.pi,
+        sympy.Symbol('x'),
+    ],
+    ids=angle_idfn,
+)
+def test_rotation_gates(klass, matrix_gen, angle):
+    NumKlass, ParamKlass = klass.__subclasses__()
+    if not issubclass(ParamKlass, _param.ParametricGate):
+        ParamKlass, NumKlass = NumKlass, ParamKlass
+
+    gate = klass(angle)
+    expected_matrix = create_matrix(angle, matrix_gen)
+
     assert gate.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate.matrix, expected_matrix)
+    if not isinstance(angle, SympyBase):
+        assert np.allclose(gate.matrix, expected_matrix)
+        assert gate.__class__ is NumKlass
+    else:
+        gate_copy = deepcopy(gate)
+        assert gate.__class__ is ParamKlass
+        assert gate.matrix == expected_matrix
+        gate_evald = gate.evaluate({angle: 1})
+        assert gate_evald is not gate
+        assert gate == gate_copy
+        assert gate_evald.__class__ is NumKlass
 
+        # Make sure they have the same dispatch class
+        assert gate_evald.klass is gate.klass
 
-@pytest.mark.parametrize("angle", [0, 0.2, 2.1, 4.1, 2 * math.pi, 4 * math.pi])
-def test_ry(angle):
-    gate = _gates.Ry(angle)
-    expected_matrix = np.matrix(
-        [
-            [math.cos(0.5 * angle), -math.sin(0.5 * angle)],
-            [math.sin(0.5 * angle), math.cos(0.5 * angle)],
-        ]
-    )
-    assert gate.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate.matrix, expected_matrix)
+        try:
+            _ = float(angle)
+        except TypeError:
+            # Only test equality if angle is a symbol and not a sympy
+            # integer/floating point
+            assert gate_evald == NumKlass(1)
 
-
-@pytest.mark.parametrize("angle", [0, 0.2, 2.1, 4.1, 2 * math.pi, 4 * math.pi])
-def test_rz(angle):
-    gate = _gates.Rz(angle)
-    expected_matrix = np.matrix([[cmath.exp(-0.5 * 1j * angle), 0], [0, cmath.exp(0.5 * 1j * angle)]])
-    assert gate.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate.matrix, expected_matrix)
-
-
-@pytest.mark.parametrize("angle", [0, 0.2, 2.1, 4.1, 2 * math.pi, 4 * math.pi])
-def test_rxx(angle):
-    gate = _gates.Rxx(angle)
-    expected_matrix = np.matrix(
-        [
-            [cmath.cos(0.5 * angle), 0, 0, -1j * cmath.sin(0.5 * angle)],
-            [0, cmath.cos(0.5 * angle), -1j * cmath.sin(0.5 * angle), 0],
-            [0, -1j * cmath.sin(0.5 * angle), cmath.cos(0.5 * angle), 0],
-            [-1j * cmath.sin(0.5 * angle), 0, 0, cmath.cos(0.5 * angle)],
-        ]
-    )
-    assert gate.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate.matrix, expected_matrix)
-
-
-@pytest.mark.parametrize("angle", [0, 0.2, 2.1, 4.1, 2 * math.pi, 4 * math.pi])
-def test_ryy(angle):
-    gate = _gates.Ryy(angle)
-    expected_matrix = np.matrix(
-        [
-            [cmath.cos(0.5 * angle), 0, 0, 1j * cmath.sin(0.5 * angle)],
-            [0, cmath.cos(0.5 * angle), -1j * cmath.sin(0.5 * angle), 0],
-            [0, -1j * cmath.sin(0.5 * angle), cmath.cos(0.5 * angle), 0],
-            [1j * cmath.sin(0.5 * angle), 0, 0, cmath.cos(0.5 * angle)],
-        ]
-    )
-    assert gate.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate.matrix, expected_matrix)
-
-
-@pytest.mark.parametrize("angle", [0, 0.2, 2.1, 4.1, 2 * math.pi, 4 * math.pi])
-def test_rzz(angle):
-    gate = _gates.Rzz(angle)
-    expected_matrix = np.matrix(
-        [
-            [cmath.exp(-0.5 * 1j * angle), 0, 0, 0],
-            [0, cmath.exp(0.5 * 1j * angle), 0, 0],
-            [0, 0, cmath.exp(0.5 * 1j * angle), 0],
-            [0, 0, 0, cmath.exp(-0.5 * 1j * angle)],
-        ]
-    )
-    assert gate.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate.matrix, expected_matrix)
-
-
-@pytest.mark.parametrize("angle", [0, 0.2, 2.1, 4.1, 2 * math.pi])
-def test_ph(angle):
-    gate = _gates.Ph(angle)
-    gate2 = _gates.Ph(angle + 2 * math.pi)
-    expected_matrix = np.matrix([[cmath.exp(1j * angle), 0], [0, cmath.exp(1j * angle)]])
-    assert gate.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate.matrix, expected_matrix)
-    assert gate2.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate2.matrix, expected_matrix)
-    assert gate == gate2
-
-
-@pytest.mark.parametrize("angle", [0, 0.2, 2.1, 4.1, 2 * math.pi])
-def test_r(angle):
-    gate = _gates.R(angle)
-    gate2 = _gates.R(angle + 2 * math.pi)
-    expected_matrix = np.matrix([[1, 0], [0, cmath.exp(1j * angle)]])
-    assert gate.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate.matrix, expected_matrix)
-    assert gate2.matrix.shape == expected_matrix.shape
-    assert np.allclose(gate2.matrix, expected_matrix)
-    assert gate == gate2
+            assert gate.evaluate({angle: 0}).is_identity()
+            assert gate.evaluate({angle: 4 * math.pi}).is_identity()
 
 
 def test_flush_gate():
@@ -304,7 +361,7 @@ def test_simulator_flip_bits(bits_to_flip, result):
     _gates.FlipBits(bits_to_flip) | qubits
     eng.flush()
     assert pytest.approx(eng.backend.get_probability(result, qubits)) == 1.0
-    _metagates.All(Measure) | qubits
+    _metagates.All(_gates.Measure) | qubits
 
 
 def test_flip_bits_can_be_applied_to_various_qubit_qureg_formats():
@@ -333,4 +390,51 @@ def test_flip_bits_can_be_applied_to_various_qubit_qureg_formats():
     _gates.FlipBits(2) | [qubits[0]] + [qubits[1], qubits[2]]
     eng.flush()
     assert pytest.approx(eng.backend.get_probability('0010', qubits)) == 1.0
-    _metagates.All(Measure) | qubits
+    _metagates.All(_gates.Measure) | qubits
+
+
+@pytest.mark.parametrize(
+    "gate_class", [_gates.Ph, _gates.Rx, _gates.Ry, _gates.Rz, _gates.Rxx, _gates.Ryy, _gates.Rzz, _gates.R], ids=str
+)
+def test_sanity_check_dispatch_get_merged(gate_class):
+    # Make sure that if dispatching works properly for these classes
+
+    x = sympy.symbols('x')
+    y = 1.12
+    z = x + y
+
+    merged_gate = gate_class(x).get_merged(gate_class(y))
+    assert merged_gate == gate_class(z)
+
+
+@pytest.mark.parametrize(
+    "num_class, param_class",
+    [
+        (_gates.PhNum, _gates.PhParam),
+        (_gates.RxNum, _gates.RxParam),
+        (_gates.RyNum, _gates.RyParam),
+        (_gates.RzNum, _gates.RzParam),
+        (_gates.RxxNum, _gates.RxxParam),
+        (_gates.RyyNum, _gates.RyyParam),
+        (_gates.RzzNum, _gates.RzzParam),
+        (_gates.RNum, _gates.RParam),
+    ],
+    ids=str,
+)
+def test_sanity_check_get_merged(num_class, param_class):
+    # Make sure that if we explicitely instantiate the classes, merging works
+    x = sympy.symbols('x')
+    y = 1.12
+    z = x + y
+
+    merged_gate = param_class(x).get_merged(num_class(y))
+    assert merged_gate == param_class(z)
+
+    merged_gate = num_class(y).get_merged(param_class(x))
+    assert merged_gate == param_class(z)
+
+    merged_gate = num_class(y).get_merged(num_class(y))
+    assert merged_gate == num_class(2 * y)
+
+    merged_gate = param_class(x).get_merged(param_class(x))
+    assert merged_gate == param_class(2 * x)

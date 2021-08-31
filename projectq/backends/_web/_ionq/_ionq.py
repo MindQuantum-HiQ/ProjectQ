@@ -29,13 +29,13 @@ from projectq.ops import (
     FlushGate,
     HGate,
     Measure,
-    R,
-    Rx,
-    Rxx,
-    Ry,
-    Ryy,
-    Rz,
-    Rzz,
+    RNum,
+    RxNum,
+    RxxNum,
+    RyNum,
+    RyyNum,
+    RzNum,
+    RzzNum,
     Sdag,
     SGate,
     SqrtXGate,
@@ -55,15 +55,15 @@ GATE_MAP = {
     YGate: 'y',
     ZGate: 'z',
     HGate: 'h',
-    Rx: 'rx',
-    Ry: 'ry',
-    Rz: 'rz',
+    RxNum: 'rx',
+    RyNum: 'ry',
+    RzNum: 'rz',
     SGate: 's',
     TGate: 't',
     SqrtXGate: 'v',
-    Rxx: 'xx',
-    Ryy: 'yy',
-    Rzz: 'zz',
+    RxxNum: 'xx',
+    RyyNum: 'yy',
+    RzzNum: 'zz',
     SwapGate: 'swap',
 }
 SUPPORTED_GATES = tuple(GATE_MAP.keys())
@@ -242,7 +242,7 @@ class IonQBackend(BasicEngine):  # pylint: disable=too-many-instance-attributes
         }
 
         # Check if we have a rotation
-        if isinstance(gate, (R, Rx, Ry, Rz, Rxx, Ryy, Rzz)):
+        if isinstance(gate, (RNum, RxNum, RyNum, RzNum, RxxNum, RyyNum, RzzNum)):
             gate_dict['rotation'] = gate.angle
 
         # Set controls

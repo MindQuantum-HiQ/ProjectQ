@@ -16,12 +16,6 @@
 
 """Module containing the definition of a decomposition rule."""
 
-from projectq.ops import BasicGate
-
-
-class ThisIsNotAGateClassError(TypeError):
-    """Exception raised when a gate instance is encountered instead of a gate class in a decomposition rule."""
-
 
 class DecompositionRule:  # pylint: disable=too-few-public-methods
     """A rule for breaking down specific gates into sequences of simpler gates."""
@@ -49,19 +43,7 @@ class DecompositionRule:  # pylint: disable=too-few-public-methods
 
                 If no gate_recognizer is given, the decomposition applies to all gates matching the gate_class.
         """
-        # Check for common gate_class type mistakes.
-        if isinstance(gate_class, BasicGate):
-            raise ThisIsNotAGateClassError(
-                "gate_class is a gate instance instead of a type of BasicGate."
-                "\nDid you pass in someGate instead of someGate.__class__?"
-            )
-        if gate_class == type.__class__:
-            raise ThisIsNotAGateClassError(
-                "gate_class is type.__class__ instead of a type of BasicGate."
-                "\nDid you pass in GateType.__class__ instead of GateType?"
-            )
-
-        self.gate_class = gate_class
+        self.gate_class = gate_class.klass
         self.gate_decomposer = gate_decomposer
         self.gate_recognizer = gate_recognizer
         self.rule_priority = rule_priority

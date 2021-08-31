@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2018 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -35,4 +36,4 @@ def _recognize_cnot(cmd):
 
 
 #: Decomposition rules
-all_defined_decomposition_rules = [DecompositionRule(X.__class__, _decompose_cnot, _recognize_cnot)]
+all_defined_decomposition_rules = [DecompositionRule(X, _decompose_cnot, _recognize_cnot)]

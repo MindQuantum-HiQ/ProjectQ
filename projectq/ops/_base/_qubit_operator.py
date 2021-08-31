@@ -17,12 +17,15 @@
 
 import cmath
 import copy
+from numbers import Number
+
+import sympy
+from sympy.core.basic import Basic as SympyBase
 
 from ._basics import BasicGate
 from ._command import apply_command
 from ._exceptions import NotInvertible, NotMergeable
 from ._gates import Ph, X, Y, Z
-
 
 EQ_TOLERANCE = 1e-12
 
@@ -47,8 +50,30 @@ _PAULI_OPERATOR_PRODUCTS = {
 }
 
 
+def _phase(coefficient):
+    # Here, we also force conversion of Sympy.Float, Sympy.Integer to float
+    if isinstance(coefficient, Number) or coefficient.is_number:
+        return cmath.phase(coefficient)
+    return sympy.arg(coefficient)
+
+
+def _to_number(arg):
+    # This includes int, float, complex, sympy.Integers and sympy.Float
+    if isinstance(arg, Number):
+        return arg
+    return complex(arg)
+
+
 class QubitOperatorError(Exception):
     """Exception raised when a QubitOperator is instantiated with some invalid data."""
+
+
+class UnitaryInverseError(Exception):
+    """Exception raised when trying to invert a QubitOperator whose coefficient is not close to 1."""
+
+
+class UnitaryIsSymbolicError(Exception):
+    """Exception raised when trying to invert a parametric QubitOperator."""
 
 
 class QubitOperator(BasicGate):
@@ -136,8 +161,8 @@ class QubitOperator(BasicGate):
             QubitOperatorError: Invalid operators provided to QubitOperator.
         """
         super().__init__()
-        if not isinstance(coefficient, (int, float, complex)):
-            raise ValueError('Coefficient must be a numeric type.')
+        if not isinstance(coefficient, (Number, SympyBase)):
+            raise ValueError('Coefficient must be a numeric type or a sympy ' 'expression!')
         self.terms = {}
         if term is None:
             return
@@ -190,13 +215,27 @@ class QubitOperator(BasicGate):
             abs_tol(float): Absolute tolerance, must be at least 0.0
         """
         new_terms = {}
-        for term in self.terms:
-            coeff = self.terms[term]
-            if abs(coeff.imag) <= abs_tol:
+        for term, coeff in self.terms.items():
+            if isinstance(coeff, (int, float, complex)) and abs(coeff.imag) <= abs_tol:
                 coeff = coeff.real
+            elif isinstance(coeff, SympyBase) and abs(sympy.im(coeff)) <= abs_tol:
+                coeff = sympy.re(coeff)
             if abs(coeff) > abs_tol:
                 new_terms[term] = coeff
         self.terms = new_terms
+
+    def is_parametric(self):
+        """
+        Check whether the gate instance is parametric (ie. has free parameters).
+
+        Returns:
+            True if the gate is parametric, False otherwise.
+        """
+        # pylint: disable=no-self-use
+        for coeff in self.terms.values():
+            if isinstance(coeff, SympyBase) and not coeff.is_number:
+                return True
+        return False
 
     def isclose(self, other, rel_tol=1e-12, abs_tol=1e-12):
         """
@@ -213,17 +252,36 @@ class QubitOperator(BasicGate):
         """
         # terms which are in both:
         for term in set(self.terms).intersection(set(other.terms)):
-            left = self.terms[term]
-            right = other.terms[term]
-            # math.isclose does this in Python >=3.5
-            if not abs(left - right) <= max(rel_tol * max(abs(left), abs(right)), abs_tol):
+            coeff_a = self.terms[term]
+            coeff_b = other.terms[term]
+
+            a_is_param = isinstance(coeff_a, SympyBase) and not coeff_a.is_number
+            b_is_param = isinstance(coeff_b, SympyBase) and not coeff_b.is_number
+
+            if a_is_param and b_is_param:
+                if coeff_a != coeff_b:
+                    return False
+            elif a_is_param or b_is_param:
                 return False
+            else:
+                coeff_a = complex(coeff_a)
+                coeff_b = complex(coeff_b)
+
+                if not cmath.isclose(coeff_a, coeff_b, rel_tol=rel_tol, abs_tol=abs_tol):
+                    return False
+
         # terms only in one (compare to 0.0 so only abs_tol)
         for term in set(self.terms).symmetric_difference(set(other.terms)):
             if term in self.terms:
-                if not abs(self.terms[term]) <= abs_tol:
-                    return False
-            elif not abs(other.terms[term]) <= abs_tol:
+                coeff = self.terms[term]
+            else:
+                coeff = other.terms[term]
+
+            if isinstance(coeff, SympyBase) and not coeff.is_number:
+                return False
+
+            # If coeff is a SympyBase then it is a number so this is ok
+            if not abs(complex(coeff)) <= abs_tol:
                 return False
         return True
 
@@ -289,8 +347,10 @@ class QubitOperator(BasicGate):
                 "to qubits with this function."
             )
         ((term, coefficient),) = self.terms.items()
-        phase = cmath.phase(coefficient)
-        if abs(coefficient) < 1 - EQ_TOLERANCE or abs(coefficient) > 1 + EQ_TOLERANCE:
+        phase = _phase(coefficient)
+        if (isinstance(coefficient, Number) or coefficient.is_number) and (
+            abs(coefficient) < 1 - EQ_TOLERANCE or abs(coefficient) > 1 + EQ_TOLERANCE
+        ):
             raise TypeError(
                 "abs(coefficient) != 1. Only QubitOperators "
                 "consisting of a single term (single n-qubit "
@@ -333,17 +393,58 @@ class QubitOperator(BasicGate):
         cmd = new_qubitoperator.generate_command(new_qubits)
         apply_command(cmd)
 
+    def evaluate(self, subs=None):
+        """
+        Evaluate all the attributes of a ParametricGate instance given some substitution.
+
+        Args:
+            subs (dict): Symbol substitutions to perform
+
+        Returns:
+            New gate instance with its attributes evaluated given the substitutions.
+
+        Note:
+            Only substitutions meaningful for each stored attributes are considered; any superfluous are silently
+            ignored.
+            e.g. if self.angle = '2*x', the call self.evaluate(y=1) will not
+                 change the value of self.angle
+
+            Also note that whenever possible, this function will attempt to convert sympy expressions to float
+            (e.g. sympy.Float or sympy.Integer)
+        """
+        new_terms = {}
+        for term, coeff in self.terms.items():
+            if not isinstance(coeff, Number):
+                substituted = coeff.evalf(subs=subs)
+                try:
+                    new_terms[term] = _to_number(substituted)
+                except TypeError:
+                    new_terms[term] = substituted
+            else:
+                new_terms[term] = _to_number(coeff)
+
+        new_op = QubitOperator()
+        new_op.terms = new_terms
+        return new_op
+
     def get_inverse(self):
         """
         Return the inverse gate of a QubitOperator if applied as a gate.
 
         Raises:
-            NotInvertible: Not implemented for QubitOperators which have
-                           multiple terms or a coefficient with absolute value
-                           not equal to 1.
+            NotInvertible: Not implemented for QubitOperators which have multiple terms or a coefficient with absolute
+                           value not equal to 1.
         """
         if len(self.terms) == 1:
             ((term, coefficient),) = self.terms.items()
+            try:
+                coefficient = _to_number(coefficient)
+            except TypeError:
+                pass
+            if isinstance(coefficient, SympyBase):
+                # Delay check of inversion validity until later evaluation
+                sentinel = IsUnitaryCoeffOpSentinel(coefficient ** (-1))
+                return QubitOperator(term, sentinel)
             if not abs(coefficient) < 1 - EQ_TOLERANCE and not abs(coefficient) > 1 + EQ_TOLERANCE:
                 return QubitOperator(term, coefficient ** (-1))
         raise NotInvertible("BasicGate: No get_inverse() implemented.")
@@ -369,7 +470,7 @@ class QubitOperator(BasicGate):
             multiplier(complex float, or QubitOperator): multiplier
         """
         # Handle scalars.
-        if isinstance(multiplier, (int, float, complex)):
+        if isinstance(multiplier, (int, float, complex, SympyBase)):
             for term in self.terms:
                 self.terms[term] *= multiplier
             return self
@@ -377,9 +478,9 @@ class QubitOperator(BasicGate):
         # Handle QubitOperator.
         if isinstance(multiplier, QubitOperator):  # pylint: disable=too-many-nested-blocks
             result_terms = {}
-            for left_term in self.terms:
-                for right_term in multiplier.terms:
-                    new_coefficient = self.terms[left_term] * multiplier.terms[right_term]
+            for left_term, left_coeff in self.terms.items():
+                for right_term, right_coeff in multiplier.terms.items():
+                    new_coefficient = left_coeff * right_coeff
 
                     # Loop through local operators and create new sorted list
                     # of representing the product local operator:
@@ -442,10 +543,11 @@ class QubitOperator(BasicGate):
         Raises:
             TypeError: Invalid type cannot be multiply with QubitOperator.
         """
-        if isinstance(multiplier, (int, float, complex, QubitOperator)):
+        if isinstance(multiplier, (int, float, complex, SympyBase, QubitOperator)):
             product = copy.deepcopy(self)
             product *= multiplier
             return product
+
         raise TypeError('Object of invalid type cannot multiply with QubitOperator.')
 
     def __rmul__(self, multiplier):
@@ -465,7 +567,7 @@ class QubitOperator(BasicGate):
         Raises:
             TypeError: Object of invalid type cannot multiply QubitOperator.
         """
-        if not isinstance(multiplier, (int, float, complex)):
+        if not isinstance(multiplier, (int, float, complex, SympyBase)):
             raise TypeError('Object of invalid type cannot multiply with QubitOperator.')
         return self * multiplier
 
@@ -485,13 +587,13 @@ class QubitOperator(BasicGate):
         Raises:
             TypeError: Cannot divide local operator by non-scalar type.
         """
-        if not isinstance(divisor, (int, float, complex)):
+        if not isinstance(divisor, (int, float, complex, SympyBase)):
             raise TypeError('Cannot divide QubitOperator by non-scalar type.')
         return self * (1.0 / divisor)
 
     def __itruediv__(self, divisor):
         """Perform self =/ divisor for a scalar."""
-        if not isinstance(divisor, (int, float, complex)):
+        if not isinstance(divisor, (int, float, complex, SympyBase)):
             raise TypeError('Cannot divide QubitOperator by non-scalar type.')
         self *= 1.0 / divisor
         return self
@@ -509,10 +611,13 @@ class QubitOperator(BasicGate):
         if isinstance(addend, QubitOperator):
             for term in addend.terms:
                 if term in self.terms:
-                    if abs(addend.terms[term] + self.terms[term]) > 0.0:
+                    try:
+                        if abs(addend.terms[term] + self.terms[term]) > 0.0:
+                            self.terms[term] += addend.terms[term]
+                        else:
+                            self.terms.pop(term)
+                    except TypeError:
                         self.terms[term] += addend.terms[term]
-                    else:
-                        self.terms.pop(term)
                 else:
                     self.terms[term] = addend.terms[term]
         else:
@@ -567,8 +672,11 @@ class QubitOperator(BasicGate):
         if not self.terms:
             return '0'
         string_rep = ''
-        for term in self.terms:
-            tmp_string = '{}'.format(self.terms[term])
+        for term, coeff in self.terms.items():
+            if isinstance(coeff, Number):
+                tmp_string = '{}'.format(coeff)
+            else:
+                tmp_string = '({})'.format(coeff)
             if term == ():
                 tmp_string += ' I'
             for operator in term:
@@ -590,3 +698,37 @@ class QubitOperator(BasicGate):
     def __hash__(self):
         """Compute the hash of the object."""
         return hash(str(self))
+
+
+class IsUnitaryCoeffOpSentinel(sympy.Function):  # pylint: disable=too-few-public-methods
+    """
+    Sentinel class to check upon evaluation if a QubitOperator is invertible.
+
+    This class sole purpose is to postpone checking whether the coefficient of
+    a QubitOperator is close to 1 (in which case it is invertible) until some
+    evaluation using the .evaluate() method is made.
+
+    This allows symbolic calculus to occur with possible simplifications, but
+    still retain some control on whether an inversion is possible.
+    """
+
+    nargs = 1
+
+    __hash__ = sympy.Function.__hash__
+
+    def __eq__(self, other):
+        """Equal operator."""
+        return self.args[0] == other
+
+    def _eval_evalf(self, prec):
+        try:
+            val = self.args[0]._eval_evalf(prec)  # pylint: disable=protected-access
+            if abs(float(abs(val)) - 1) > EQ_TOLERANCE:
+                raise UnitaryInverseError(
+                    'Unable to invert QubitOperator: ' 'coefficient is not close to 1 ({})'.format(val)
+                )
+            return val
+        except TypeError as err:
+            raise UnitaryIsSymbolicError(
+                'Unable to invert QubitOperator: coefficient is symbolic! ({})'.format(val)
+            ) from err
