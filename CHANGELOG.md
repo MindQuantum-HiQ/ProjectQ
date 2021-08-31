@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     This should provide better oportunities for customizations in the future without the need to merge all changes into
     ProjectQ.
 -   Support for parameterized quantum gates (e.g. Rx, Ry, Rz, QubitOperator, TimeEvolution, etc.)
+-   Support for exporting HiQ-ProjectQ quantum circuits as JSON encoded strings
 
 ### Updated
 
