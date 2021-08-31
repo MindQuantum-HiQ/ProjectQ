@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Added option to DrawerMatplotlib backend to enable/disable LaTeX output of symbols
 
+### Repository
+
+-   Added some templates when creating GitHub issues
+
 
 ## [0.7.0] - 2021-08-31
 
