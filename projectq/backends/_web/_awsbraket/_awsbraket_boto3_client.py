@@ -274,7 +274,7 @@ class AWSBraket:
                 status = quantum_task['status']
                 bucket = quantum_task['outputS3Bucket']
                 directory = quantum_task['outputS3Directory']
-                resultsojectname = directory + '/results.json'
+                resultsojectname = ''.join([directory, '/results.json'])
                 if status == 'COMPLETED':
                     # Get the device type to obtian the correct measurement
                     # structure

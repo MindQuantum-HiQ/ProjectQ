@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017, 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -51,7 +52,7 @@ class CircuitItem:  # pylint: disable=too-few-public-methods
         )
 
 
-class CircuitDrawer(BasicEngine):
+class CircuitDrawer(BasicEngine):  # pylint: disable=too-many-instance-attributes
     """
     CircuitDrawer is a compiler engine which generates TikZ code for drawing quantum circuits.
 
@@ -226,14 +227,13 @@ class CircuitDrawer(BasicEngine):
             for qureg in cmd.qubits:
                 for qubit in qureg:
                     if self._accept_input:
-                        meas = None
-                        while meas not in ('0', '1', 1, 0):
-                            prompt = "Input measurement result (0 or 1) for qubit " + str(qubit) + ": "
-                            meas = input(prompt)
+                        meas_str = None
+                        while meas_str not in ('0', '1', 1, 0):
+                            prompt = "Input measurement result (0 or 1) for qubit {}: ".format(qubit)
+                            meas_str = input(prompt)
                     else:
-                        meas = self._default_measure
-                    meas = int(meas)
-                    self.main_engine.set_measurement_result(qubit, meas)
+                        meas_str = self._default_measure
+                    self.main_engine.set_measurement_result(qubit, int(meas_str))
 
         all_lines = [qb.id for qr in cmd.all_qubits for qb in qr]
 
@@ -265,10 +265,11 @@ class CircuitDrawer(BasicEngine):
         """
         qubit_lines = {}
 
-        for line in range(len(self._qubit_lines)):
+        for line, qubit_line in self._qubit_lines.items():
             new_line = self._map[line]
             qubit_lines[new_line] = []
-            for cmd in self._qubit_lines[line]:
+
+            for cmd in qubit_line:
                 lines = [self._map[qb_id] for qb_id in cmd.lines]
                 ctrl_lines = [self._map[qb_id] for qb_id in cmd.ctrl_lines]
                 gate = cmd.gate

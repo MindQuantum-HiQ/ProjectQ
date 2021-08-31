@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,7 +26,7 @@ import random
 import numpy as _np
 
 _USE_REFCHECK = True
-if 'TRAVIS' in os.environ:  # pragma: no cover
+if 'TRAVIS' in os.environ or 'NO_REFCHECK' in os.environ:  # pragma: no cover
     _USE_REFCHECK = False
 
 
@@ -83,7 +84,7 @@ class Simulator:
 
         i_picked -= 1
 
-        pos = [self._map[ID] for ID in ids]
+        pos = [self._map[qubit_id] for qubit_id in ids]
         res = [False] * len(pos)
 
         mask = 0
@@ -205,7 +206,7 @@ class Simulator:
                 qb_locs[-1].append(self._map[qubit_id])
 
         newstate = _np.zeros_like(self._state)
-        for i in range(0, len(self._state)):
+        for i, state_i in enumerate(self._state):
             if (mask & i) == mask:
                 arg_list = [0] * len(qb_locs)
                 for qr_i, qr_loc in enumerate(qb_locs):
@@ -218,9 +219,9 @@ class Simulator:
                     for qb_i, qb_loc in enumerate(qr_loc):
                         if not ((new_i >> qb_loc) & 1) == ((res[qr_i] >> qb_i) & 1):
                             new_i ^= 1 << qb_loc
-                newstate[new_i] = self._state[i]
+                newstate[new_i] = state_i
             else:
-                newstate[i] = self._state[i]
+                newstate[i] = state_i
 
         self._state = newstate
 
@@ -377,7 +378,7 @@ class Simulator:
             pos = self._map[ids[0]]
             self._single_qubit_gate(matrix, pos, mask)
         else:
-            pos = [self._map[ID] for ID in ids]
+            pos = [self._map[qubit_id] for qubit_id in ids]
             self._multi_qubit_gate(matrix, pos, mask)
 
     def _single_qubit_gate(self, matrix, pos, mask):
@@ -470,7 +471,7 @@ class Simulator:
         if len(ids) != len(values):
             raise ValueError('The number of ids and values do not match!')
         # all qubits must have been allocated before
-        if not all(Id in self._map for Id in ids):
+        if not all(qubit_id in self._map for qubit_id in ids):
             raise RuntimeError(
                 "collapse_wavefunction(): Unknown qubit id(s) provided. Try calling eng.flush() before "
                 "invoking this function."
@@ -482,13 +483,13 @@ class Simulator:
             mask |= 1 << pos
             val |= int(values[i]) << pos
         nrm = 0.0
-        for i in range(len(self._state)):
+        for i, state_i in enumerate(self._state):
             if (mask & i) == val:
-                nrm += _np.abs(self._state[i]) ** 2
+                nrm += _np.abs(state_i) ** 2
         if nrm < 1.0e-12:
             raise RuntimeError("collapse_wavefunction(): Invalid collapse! Probability is ~0.")
         inv_nrm = 1.0 / _np.sqrt(nrm)
-        for i in range(len(self._state)):
+        for i, _ in enumerate(self._state):
             if (mask & i) != val:
                 self._state[i] = 0.0
             else:
@@ -498,7 +499,7 @@ class Simulator:
         """
         Provide a dummy implementation for running a quantum circuit.
 
-        Only defined to provide the same interface as the c++ simulator.
+        Only defined to provide the same interface as the C++ simulator.
         """
 
     def _apply_term(self, term, ids, ctrlids=None):

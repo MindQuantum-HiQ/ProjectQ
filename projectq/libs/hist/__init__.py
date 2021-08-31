@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """
-contains a function to plot measurement outcome probabilities
+Contains a function to plot measurement outcome probabilities
 as a histogram for the simulator
 """
 

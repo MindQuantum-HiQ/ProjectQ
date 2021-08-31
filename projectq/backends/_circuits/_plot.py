@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -109,7 +110,7 @@ def to_draw(qubit_lines, qubit_labels=None, drawing_order=None, **kwargs):
         drawing_order = {qubit_id: n_qubits - qubit_id - 1 for qubit_id in list(qubit_lines)}
     else:
         if set(drawing_order) != set(qubit_lines):
-            raise RuntimeError('Qubit IDs in drawing_order do not match ' + 'qubit IDs in qubit_lines!')
+            raise RuntimeError('Qubit IDs in drawing_order do not match qubit IDs in qubit_lines!')
         if set(drawing_order.values()) != set(range(len(drawing_order))):
             raise RuntimeError(
                 'Indices of qubit wires in drawing_order must be between 0 and {}!'.format(len(drawing_order))
@@ -261,11 +262,11 @@ def create_figure(plot_params):
     Returns:
         A tuple with (figure, axes)
     """
-    fig = plt.figure(facecolor='w', edgecolor='w')
+    fig = plt.figure(facecolor='w', edgecolor='w', figsize=plot_params.get('figsize', [6.4, 4.8]))
     axes = plt.axes()
     axes.set_axis_off()
     axes.set_aspect('equal')
-    plot_params['units_per_inch'] = fig.dpi / axes.get_window_extent().width
+    plot_params['units_per_inch'] = fig.dpi / axes.get_window_extent().height
     return fig, axes
 
 
@@ -357,8 +358,12 @@ def draw_gate(
         else:
             if sorted(targets_order) != list(range(min(targets_order), max(targets_order) + 1)):
                 raise RuntimeError(
-                    'Multi-qubit gate with non-neighbouring qubits!\n'
-                    + 'Gate: {} on wires {}'.format(gate_str, targets_order)
+                    '\n'.join(
+                        (
+                            'Multi-qubit gate with non-neighbouring qubits!',
+                            'Gate: {} on wires {}'.format(gate_str, targets_order),
+                        )
+                    )
                 )
 
             multi_qubit_gate(

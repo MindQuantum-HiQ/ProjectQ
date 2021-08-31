@@ -381,13 +381,12 @@ class AWSBraketBackend(BasicEngine):  # pylint: disable=too-many-instance-attrib
             raise RuntimeError("Please, run the circuit first!")
 
         probability_dict = {}
-        for state in self._probabilities:
+        for state, probability in self._probabilities.items():
             mapped_state = ['0'] * len(qureg)
             for i, qubit in enumerate(qureg):
                 if self._logical_to_physical(qubit.id) >= len(state):  # pragma: no cover
                     raise IndexError('Physical ID {} > length of internal probabilities array'.format(qubit.id))
                 mapped_state[i] = state[self._logical_to_physical(qubit.id)]
-            probability = self._probabilities[state]
             mapped_state = "".join(mapped_state)
             if mapped_state not in probability_dict:
                 probability_dict[mapped_state] = probability

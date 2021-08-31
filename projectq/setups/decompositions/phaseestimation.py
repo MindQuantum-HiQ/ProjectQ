@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2018 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -89,7 +90,7 @@ from projectq.meta import Control, Loop
 from projectq.ops import QFT, QPE, H, Tensor, get_inverse
 
 
-def _decompose_QPE(cmd):  # pylint: disable=invalid-name
+def _decompose_QPE(cmd):  # pylint: disable=invalid-name # noqa: N802
     """Decompose the Quantum Phase Estimation gate."""
     eng = cmd.engine
 

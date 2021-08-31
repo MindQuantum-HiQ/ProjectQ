@@ -34,6 +34,7 @@
 #   * send_too_many_setup
 #   * real_device_online_setup
 # ==============================================================================
+# pylint: skip-file
 
 """Define test fixtures for the AWSBraket HTTP client."""
 

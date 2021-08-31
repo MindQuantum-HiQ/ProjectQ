@@ -141,12 +141,12 @@ def _recognize_v(matrix):  # pylint: disable=too-many-branches
         (two_b / 2.0 + math.pi) % (2 * math.pi),
     ]
     tmp = math.acos(abs(matrix[1][0]))
-    # yapf: disable
-    possible_c_half = [tmp % (2*math.pi),
-                       (tmp+math.pi) % (2*math.pi),
-                       (-1.*tmp) % (2*math.pi),
-                       (-1.*tmp+math.pi) % (2*math.pi)]
-    # yapf: enable
+    possible_c_half = [
+        tmp % (2 * math.pi),
+        (tmp + math.pi) % (2 * math.pi),
+        (-1.0 * tmp) % (2 * math.pi),
+        (-1.0 * tmp + math.pi) % (2 * math.pi),
+    ]
     for b, c_half in itertools.product(possible_b, possible_c_half):  # pylint: disable=invalid-name
         if _test_parameters(matrix, a, b, c_half):
             return (a, b, c_half)
@@ -183,6 +183,8 @@ def _decompose_carb1qubit(cmd):  # pylint: disable=too-many-branches
 
     For a proof follow Lemma 5.5 of Barenco et al.
     """
+    # pylint: disable=invalid-name
+
     matrix = cmd.gate.matrix.tolist()
     qb = cmd.qubits
     eng = cmd.engine
@@ -207,9 +209,9 @@ def _decompose_carb1qubit(cmd):  # pylint: disable=too-many-branches
 
     # Case 2: General matrix U:
     else:
-        a, b_half, c_half, d_half = arb1q._find_parameters(matrix)  # pylint: disable=invalid-name, protected-access
-        d = 2 * d_half  # pylint: disable=invalid-name
-        b = 2 * b_half  # pylint: disable=invalid-name
+        a, b_half, c_half, d_half = arb1q._find_parameters(matrix)  # pylint: disable=protected-access
+        d = 2 * d_half
+        b = 2 * b_half
         if Rz((d - b) / 2.0) != Rz(0):
             Rz((d - b) / 2.0) | qb
         with Control(eng, cmd.control_qubits):

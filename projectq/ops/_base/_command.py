@@ -352,12 +352,8 @@ class Command:  # pylint: disable=too-many-instance-attributes
         if len(qubits) == 1:
             qstring = str(Qureg(qubits[0]))
         else:
-            qstring = "( "
-            for qreg in qubits:
-                qstring += str(Qureg(qreg))
-                qstring += ", "
-            qstring = qstring[:-2] + " )"
-        cstring = "C" * len(ctrlqubits)
-        return cstring + self.gate.to_string(symbols) + " | " + qstring
+            qstring = '( {} )'.format(', '.join([str(Qureg(qreg)) for qreg in qubits]))
+        return '{}{} | {}'.format("C" * len(ctrlqubits), self.gate.to_string(symbols), qstring)
+
 
 __all__ = ['apply_command', 'Command', 'IncompatibleControlState']

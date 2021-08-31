@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2017, 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,6 +18,7 @@
 
 import json
 
+from projectq.libs import utils
 from projectq.ops import (
     Allocate,
     DaggeredGate,
@@ -79,7 +81,7 @@ def to_latex(circuit, drawing_order=None, draw_gates_in_parallel=True):
             using, e.g., pdflatex.
     """
     try:
-        with open('settings.json') as settings_file:
+        with utils.fdopen('settings.json', 'r') as settings_file:
             settings = json.load(settings_file)
     except FileNotFoundError:
         settings = write_settings(get_default_settings())
@@ -97,7 +99,7 @@ def write_settings(settings):
     Args:
         settings (dict): Settings dict to write.
     """
-    with open('settings.json', 'w') as settings_file:
+    with utils.fdopen('settings.json', 'w') as settings_file:
         json.dump(settings, settings_file, sort_keys=True, indent=4)
     return settings
 
@@ -181,11 +183,13 @@ def _header(settings):
         gate_style += "basicshadow"
     gate_style += "]\n"
 
-    gate_style += (
-        "\\tikzstyle{operator}=[basic,minimum size=1.5em]\n"
-        "\\tikzstyle{phase}=[fill=black,shape=circle,"
-        + "minimum size={}".format(settings['control']['size'])
-        + "cm,inner sep=0pt,outer sep=0pt,draw=black"
+    gate_style += ''.join(
+        [
+            "\\tikzstyle{operator}=[basic,minimum size=1.5em]\n",
+            "\\tikzstyle{phase}=[fill=black,shape=circle,",
+            "minimum size={}".format(settings['control']['size']),
+            "cm,inner sep=0pt,outer sep=0pt,draw=black",
+        ]
     )
     if settings['control']['shadow']:
         gate_style += ",basicshadow"
@@ -260,7 +264,7 @@ def _footer():
     Returns:
         tex_footer_str (string): Latex document footer.
     """
-    return "\n\n\\end{tikzpicture}\n\\end{document}"
+    return r"\n\n\end{tikzpicture}\n\end{document}"
 
 
 class _Circ2Tikz:  # pylint: disable=too-few-public-methods
@@ -382,7 +386,7 @@ class _Circ2Tikz:  # pylint: disable=too-few-public-methods
                     self.is_quantum[_line] = False
             elif gate == Allocate:
                 # draw 'begin line'
-                add_str = "\n\\node[none] ({}) at ({},-{}) {{$\\Ket{{0}}{}$}};"
+                add_str = r"\n\node[none] ({}) at ({},-{}) {{$\Ket{{0}}{}$}};"
                 id_str = ""
                 if self.settings['gates']['AllocateQubitGate']['draw_id']:
                     id_str = "^{{\\textcolor{{red}}{{{}}}}}".format(cmds[i].id)
@@ -423,7 +427,7 @@ class _Circ2Tikz:  # pylint: disable=too-few-public-methods
                 tikz_code.append(connections)
 
             if not draw_gates_in_parallel:
-                for _line in range(len(self.pos)):
+                for _line, _ in enumerate(self.pos):
                     if _line != line:
                         self.pos[_line] = self.pos[line]
 

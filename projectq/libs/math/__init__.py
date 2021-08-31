@@ -13,6 +13,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+"""Small library to support some common mathematical functions."""
+
 from ._default_rules import all_defined_decomposition_rules
 from ._gates import (
     AddConstant,

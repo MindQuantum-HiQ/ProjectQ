@@ -25,12 +25,9 @@ from projectq.ops import CNOT, All, H
 from . import _ibm5qubitmapper
 
 
-def test_ibm5qubitmapper_is_available(monkeypatch):
+def test_ibm5qubitmapper_is_available(mocker):
     # Test that IBM5QubitMapper calls IBMBackend if gate is available.
-    def mock_send(*args, **kwargs):
-        return "Yes"
-
-    monkeypatch.setattr(_ibm5qubitmapper.IBMBackend, "is_available", mock_send)
+    mocker.patch('projectq.backends.IBMBackend.is_available', lambda self, cmd: 'Yes')
     mapper = _ibm5qubitmapper.IBM5QubitMapper()
     assert mapper.is_available("TestCommand") == "Yes"
 

@@ -27,7 +27,7 @@ from projectq.meta import get_control_count
 from projectq.ops import Ph, Rx, Rxx, Ry, X
 
 
-def _decompose_cnot2rxx_M(cmd):  # pylint: disable=invalid-name
+def _decompose_cnot2rxx_M(cmd):  # pylint: disable=invalid-name# noqa: N802
     """Decompose CNOT gate into Rxx gate."""
     # Labelled 'M' for 'minus' because decomposition ends with a Ry(-pi/2)
     ctrl = cmd.control_qubits
@@ -39,7 +39,7 @@ def _decompose_cnot2rxx_M(cmd):  # pylint: disable=invalid-name
     Ry(-1 * math.pi / 2) | ctrl[0]
 
 
-def _decompose_cnot2rxx_P(cmd):  # pylint: disable=invalid-name
+def _decompose_cnot2rxx_P(cmd):  # pylint: disable=invalid-name# noqa: N802
     """Decompose CNOT gate into Rxx gate."""
     # Labelled 'P' for 'plus' because decomposition ends with a Ry(+pi/2)
     ctrl = cmd.control_qubits

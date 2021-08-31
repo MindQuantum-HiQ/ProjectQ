@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2018 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -99,19 +100,19 @@ def get_engine_list(  # pylint: disable=too-many-branches,too-many-statements
         raise TypeError("other_gates parameter must be a tuple.")
 
     rule_set = DecompositionRuleSet(modules=[projectq.libs.math, projectq.setups.decompositions])
-    allowed_gate_classes = []  # n-qubit gates
-    allowed_gate_instances = []
-    allowed_gate_classes1 = []  # 1-qubit gates
-    allowed_gate_instances1 = []
-    allowed_gate_classes2 = []  # 2-qubit gates
-    allowed_gate_instances2 = []
+    allowed_gate_classes = ()  # n-qubit gates
+    allowed_gate_instances = ()
+    allowed_gate_classes1 = ()  # 1-qubit gates
+    allowed_gate_instances1 = ()
+    allowed_gate_classes2 = ()  # 2-qubit gates
+    allowed_gate_instances2 = ()
 
     if one_qubit_gates != "any":
         for gate in one_qubit_gates:
             if inspect.isclass(gate):
-                allowed_gate_classes1.append(gate)
+                allowed_gate_classes1 += (gate,)
             elif isinstance(gate, BasicGate):
-                allowed_gate_instances1.append(gate)
+                allowed_gate_instances1 += (gate,)
             else:
                 raise TypeError("unsupported one_qubit_gates argument")
     if two_qubit_gates != "any":
@@ -121,12 +122,12 @@ def get_engine_list(  # pylint: disable=too-many-branches,too-many-statements
                 #  separate treatment
                 if isinstance(gate, ControlledGate):  # pragma: no cover
                     raise RuntimeError('Support for controlled gate not implemented!')
-                allowed_gate_classes2.append(gate)
+                allowed_gate_classes2 += (gate,)
             elif isinstance(gate, BasicGate):
                 if isinstance(gate, ControlledGate):
-                    allowed_gate_instances2.append((gate._gate, gate._n))  # pylint: disable=protected-access
+                    allowed_gate_instances2 += ((gate._gate, gate._n),)  # pylint: disable=protected-access
                 else:
-                    allowed_gate_instances2.append((gate, 0))
+                    allowed_gate_instances2 += ((gate, 0),)
             else:
                 raise TypeError("unsupported two_qubit_gates argument")
     for gate in other_gates:
@@ -135,20 +136,14 @@ def get_engine_list(  # pylint: disable=too-many-branches,too-many-statements
             #  separate treatment
             if isinstance(gate, ControlledGate):  # pragma: no cover
                 raise RuntimeError('Support for controlled gate not implemented!')
-            allowed_gate_classes.append(gate)
+            allowed_gate_classes += (gate,)
         elif isinstance(gate, BasicGate):
             if isinstance(gate, ControlledGate):
-                allowed_gate_instances.append((gate._gate, gate._n))  # pylint: disable=protected-access
+                allowed_gate_instances += ((gate._gate, gate._n),)  # pylint: disable=protected-access
             else:
-                allowed_gate_instances.append((gate, 0))
+                allowed_gate_instances += ((gate, 0),)
         else:
             raise TypeError("unsupported other_gates argument")
-    allowed_gate_classes = tuple(allowed_gate_classes)
-    allowed_gate_instances = tuple(allowed_gate_instances)
-    allowed_gate_classes1 = tuple(allowed_gate_classes1)
-    allowed_gate_instances1 = tuple(allowed_gate_instances1)
-    allowed_gate_classes2 = tuple(allowed_gate_classes2)
-    allowed_gate_instances2 = tuple(allowed_gate_instances2)
 
     def low_level_gates(eng, cmd):  # pylint: disable=unused-argument,too-many-return-statements
         all_qubits = [q for qr in cmd.all_qubits for q in qr]

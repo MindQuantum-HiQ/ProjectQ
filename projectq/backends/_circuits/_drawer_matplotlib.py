@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2020 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -144,7 +145,7 @@ class CircuitDrawerMatplotlib(BasicEngine):
         # considering the qubit axes that are between the topmost and
         # bottommost qubit axes of the current command.
         if len(targets) + len(controls) > 1:
-            max_depth = max(len(self._qubit_lines[qubit_id]) for qubit_id in self._qubit_lines)
+            max_depth = max(len(line) for line in self._qubit_lines.values())
 
         for qb_id in itertools.chain(targets, controls):
             depth = len(self._qubit_lines[qb_id])
@@ -191,24 +192,20 @@ class CircuitDrawerMatplotlib(BasicEngine):
             output by matplotlib (default value in parentheses):
 
               - fontsize (14): Font size in pt
-              - column_spacing (.5): Vertical spacing between two
-                neighbouring gates (roughly in inches)
+              - column_spacing (.5): Vertical spacing between two neighbouring gates (roughly in inches)
               - control_radius (.015): Radius of the circle for controls
-              - labels_margin (1): Margin between labels and begin of
-                wire (roughly in inches)
+              - labels_margin (1): Margin between labels and begin of wire (roughly in inches)
               - linewidth (1): Width of line
               - not_radius (.03): Radius of the circle for X/NOT gates
-              - gate_offset (.05): Inner margins for gates with a text
-                representation
+              - gate_offset (.05): Inner margins for gates with a text representation
               - mgate_width (.1): Width of the measurement gate
               - swap_delta (.02): Half-size of the SWAP gate
               - x_offset (.05): Absolute X-offset for drawing within the axes
-              - wire_height (1): Vertical spacing between two qubit
-                wires (roughly in inches)
+              - wire_height (1): Vertical spacing between two qubit wires (roughly in inches)
         """
-        max_depth = max(len(self._qubit_lines[qubit_id]) for qubit_id in self._qubit_lines)
-        for qubit_id in self._qubit_lines:
-            depth = len(self._qubit_lines[qubit_id])
+        max_depth = max(len(line) for line in self._qubit_lines.values())
+        for qubit_id, line in self._qubit_lines.items():
+            depth = len(line)
             if depth < max_depth:
                 self._qubit_lines[qubit_id] += [None] * (max_depth - depth)
 

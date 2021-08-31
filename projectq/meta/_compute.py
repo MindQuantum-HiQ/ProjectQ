@@ -391,7 +391,7 @@ class CustomUncompute:
         drop_engine_after(self.engine)
 
 
-def Uncompute(engine):  # pylint: disable=invalid-name
+def Uncompute(engine):  # pylint: disable=invalid-name # noqa: N802
     """
     Uncompute automatically.
 

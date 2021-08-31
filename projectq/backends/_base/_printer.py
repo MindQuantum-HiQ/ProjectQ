@@ -83,13 +83,13 @@ class CommandPrinter(BasicEngine):
             for qureg in cmd.qubits:
                 for qubit in qureg:
                     if self._accept_input:
-                        meas = None
-                        while meas not in ('0', '1', 1, 0):
-                            prompt = "Input measurement result (0 or 1) for qubit " + str(qubit) + ": "
-                            meas = input(prompt)
+                        meas_str = None
+                        while meas_str not in ('0', '1', 1, 0):
+                            prompt = "Input measurement result (0 or 1) for qubit {}: ".format(qubit)
+                            meas_str = input(prompt)
                     else:
-                        meas = self._default_measure
-                    meas = int(meas)
+                        meas_str = self._default_measure
+                    meas = int(meas_str)
                     # Check there was a mapper and redirect result
                     logical_id_tag = None
                     for tag in cmd.tags:

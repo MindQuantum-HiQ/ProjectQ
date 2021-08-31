@@ -21,6 +21,8 @@ The C++ simulator has to be built first. If the C++ simulator is not exported to
 implementation is used as an alternative.
 """
 
+# pylint: disable=no-name-in-module
+
 import math
 import random
 
@@ -381,7 +383,8 @@ class Simulator(BasicEngine):
                 math_fun = cmd.gate.get_math_function(cmd.qubits)
                 self._simulator.emulate_math(math_fun, qubitids, [qb.id for qb in cmd.control_qubits])
             else:
-                # individual code for different standard gates to make it faster!
+                # Individual code for different standard gates to make it
+                # faster!
                 if isinstance(cmd.gate, AddConstant):
                     self._simulator.emulate_math_addConstant(cmd.gate.a, qubitids, [qb.id for qb in cmd.control_qubits])
                 elif isinstance(cmd.gate, AddConstantModN):

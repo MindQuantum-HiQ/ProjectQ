@@ -99,14 +99,14 @@ class IBM5QubitMapper(BasicMapperEngine):
             mapping.
         """
         cost = 0
-        for tpl in self._interactions:
+        for tpl, interaction_cost in self._interactions.items():
             ctrl_id = tpl[0]
             target_id = tpl[1]
             ctrl_pos = mapping[ctrl_id]
             target_pos = mapping[target_id]
             if not (ctrl_pos, target_pos) in self.connections:
                 if (target_pos, ctrl_pos) in self.connections:
-                    cost += self._interactions[tpl]
+                    cost += interaction_cost
                 else:
                     return None
         return cost

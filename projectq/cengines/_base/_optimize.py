@@ -201,21 +201,23 @@ class LocalOptimizer(BasicEngine):
 
     def _check_and_send(self):
         """Check whether a qubit pipeline must be sent on and, if so, optimize the pipeline and then send it on."""
-        for i in self._l:
+        for i, pipeline in self._l.items():
             if (
-                len(self._l[i]) >= self._cache_size
-                or len(self._l[i]) > 0
-                and isinstance(self._l[i][-1].gate, FastForwardingGate)
+                len(pipeline) >= self._cache_size
+                or len(pipeline) > 0
+                and isinstance(pipeline[-1].gate, FastForwardingGate)
             ):
+                # NB: self._optimize(i) will modify self._l[i], thus we cannot use `pipeline`
                 self._optimize(i)
+                # pylint: disable=unnecessary-dict-index-lookup
                 if len(self._l[i]) >= self._cache_size and not isinstance(self._l[i][-1].gate, FastForwardingGate):
                     self._send_qubit_pipeline(i, len(self._l[i]) - self._cache_size + 1)
                 elif len(self._l[i]) > 0 and isinstance(self._l[i][-1].gate, FastForwardingGate):
                     self._send_qubit_pipeline(i, len(self._l[i]))
         new_dict = {}
-        for idx in self._l:
-            if len(self._l[idx]) > 0:
-                new_dict[idx] = self._l[idx]
+        for idx, pipeline in self._l.items():
+            if len(pipeline) > 0:
+                new_dict[idx] = pipeline
         self._l = new_dict
 
     def _cache_cmd(self, cmd):
@@ -240,13 +242,13 @@ class LocalOptimizer(BasicEngine):
         """
         for cmd in command_list:
             if cmd.gate == FlushGate():  # flush gate --> optimize and flush
-                for idx in self._l:
+                for idx, pipeline in self._l.items():
                     self._optimize(idx)
-                    self._send_qubit_pipeline(idx, len(self._l[idx]))
+                    self._send_qubit_pipeline(idx, len(pipeline))
                 new_dict = {}
-                for idx in self._l:
-                    if len(self._l[idx]) > 0:  # pragma: no cover
-                        new_dict[idx] = self._l[idx]
+                for idx, pipeline in self._l.items():
+                    if len(pipeline) > 0:  # pragma: no cover
+                        new_dict[idx] = pipeline
                 self._l = new_dict
                 if self._l != {}:  # pragma: no cover
                     raise RuntimeError('Internal compiler error: qubits remaining in LocalOptimizer after a flush!')

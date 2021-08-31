@@ -53,7 +53,6 @@ jobs:
     - name: Generate requirement file (Unix)
       if: runner.os != 'Windows'
       run: |
-        python setup.py gen_reqfile --include-extras=test,braket,revkit
 
     - name: Generate requirement file (Windows)
       if: runner.os == 'Windows'
@@ -71,7 +70,6 @@ jobs:
 
     - name: Build and install package (Unix)
       if: runner.os != 'Windows'
-      run: python -m pip install -ve .[braket,revkit,test]
 
     - name: Build and install package (Windows)
       if: runner.os == 'Windows'

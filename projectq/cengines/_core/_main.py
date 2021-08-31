@@ -220,7 +220,7 @@ class MainEngine(BasicEngine):  # pylint: disable=too-many-instance-attributes
 
         Flushes the entire circuit down the pipeline, clearing all temporary buffers (in, e.g., optimizers).
         """
-        if not hasattr(sys, "last_type"):
+        if not hasattr(sys, "last_type") or sys.last_type is None:
             self.flush(deallocate_qubits=True)
         try:
             atexit.unregister(self._delfun)  # only available in Python3

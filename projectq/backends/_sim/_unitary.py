@@ -269,7 +269,7 @@ class UnitarySimulator(BasicEngine):
 
         i_picked -= 1
 
-        pos = [self._qubit_map[ID] for ID in ids]
+        pos = [self._qubit_map[qubit_id] for qubit_id in ids]
         res = [False] * len(pos)
 
         mask = 0

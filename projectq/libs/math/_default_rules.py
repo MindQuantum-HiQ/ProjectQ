@@ -55,7 +55,7 @@ def _replace_addconstant(cmd):
         add_constant(eng, const, quint)
 
 
-def _replace_addconstmodN(cmd):  # pylint: disable=invalid-name
+def _replace_addconstmodN(cmd):  # pylint: disable=invalid-name # noqa: N802
     eng = cmd.engine
     const = cmd.gate.a
     N = cmd.gate.N
@@ -65,7 +65,7 @@ def _replace_addconstmodN(cmd):  # pylint: disable=invalid-name
         add_constant_modN(eng, const, N, quint)
 
 
-def _replace_multiplybyconstantmodN(cmd):  # pylint: disable=invalid-name
+def _replace_multiplybyconstantmodN(cmd):  # pylint: disable=invalid-name # noqa: N802
     eng = cmd.engine
     const = cmd.gate.a
     N = cmd.gate.N

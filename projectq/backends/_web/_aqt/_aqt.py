@@ -70,7 +70,7 @@ class AQTBackend(BasicEngine):  # pylint: disable=too-many-instance-attributes
         use_hardware=False,
         num_runs=100,
         verbose=False,
-        token='',
+        token=None,
         device='simulator',
         num_retries=3000,
         interval=1,
@@ -235,11 +235,10 @@ class AQTBackend(BasicEngine):  # pylint: disable=too-many-instance-attributes
             raise RuntimeError("Please, run the circuit first!")
 
         probability_dict = {}
-        for state in self._probabilities:
+        for state, probability in self._probabilities.items():
             mapped_state = ['0'] * len(qureg)
             for i, qubit in enumerate(qureg):
                 mapped_state[i] = state[self._logical_to_physical(qubit.id)]
-            probability = self._probabilities[state]
             mapped_state = "".join(mapped_state)
 
             probability_dict[mapped_state] = probability_dict.get(mapped_state, 0) + probability

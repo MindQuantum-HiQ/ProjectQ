@@ -28,6 +28,7 @@
 #   * retrieve_setup
 #   * functional_setup
 # ==============================================================================
+# pylint: skip-file
 
 """Define test fixtures for the AWSBraket backend."""
 
@@ -40,7 +41,7 @@ try:
     from botocore.response import StreamingBody
 except ImportError:
 
-    class StreamingBody:
+    class StreamingBody:  # pylint: disable=too-few-public-methods
         """Dummy implementation of a StreamingBody."""
 
         def __init__(self, raw_stream, content_length):

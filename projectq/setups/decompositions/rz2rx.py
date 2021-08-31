@@ -26,7 +26,7 @@ from projectq.meta import Compute, Control, Uncompute, get_control_count
 from projectq.ops import Rx, Ry, Rz
 
 
-def _decompose_rz2rx_P(cmd):  # pylint: disable=invalid-name
+def _decompose_rz2rx_P(cmd):  # pylint: disable=invalid-name # noqa: N802
     """Decompose the Rz using negative angle."""
     # Labelled 'P' for 'plus' because decomposition ends with a Ry(+pi/2)
     qubit = cmd.qubits[0]
@@ -40,7 +40,7 @@ def _decompose_rz2rx_P(cmd):  # pylint: disable=invalid-name
         Uncompute(eng)
 
 
-def _decompose_rz2rx_M(cmd):  # pylint: disable=invalid-name
+def _decompose_rz2rx_M(cmd):  # pylint: disable=invalid-name # noqa: N802
     """Decompose the Rz using positive angle."""
     # Labelled 'M' for 'minus' because decomposition ends with a Ry(-pi/2)
     qubit = cmd.qubits[0]
@@ -54,7 +54,7 @@ def _decompose_rz2rx_M(cmd):  # pylint: disable=invalid-name
         Uncompute(eng)
 
 
-def _recognize_RzNoCtrl(cmd):  # pylint: disable=invalid-name
+def _recognize_RzNoCtrl(cmd):  # pylint: disable=invalid-name # noqa: N802
     """Decompose the gate only if the command represents a single qubit gate (if it is not part of a control gate)."""
     return get_control_count(cmd) == 0
 

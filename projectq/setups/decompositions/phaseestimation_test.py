@@ -41,7 +41,7 @@ def test_simple_test_X_eigenvectors():
     )
     N = 150
     results = np.array([])
-    for i in range(N):
+    for _ in range(N):
         autovector = eng.allocate_qureg(1)
         X | autovector
         H | autovector
@@ -75,7 +75,7 @@ def test_Ph_eigenvectors():
     )
     N = 150
     results = np.array([])
-    for i in range(N):
+    for _ in range(N):
         autovector = eng.allocate_qureg(1)
         theta = cmath.pi * 2.0 * 0.125
         unit = Ph(theta)
@@ -91,9 +91,9 @@ def test_Ph_eigenvectors():
         eng.flush()
 
     num_phase = (results == 0.125).sum()
-    assert num_phase / N >= 0.35, "Statistics phase calculation are not correct (%f vs. %f)" % (
+    assert num_phase / N >= 0.4, "Statistics phase calculation are not correct (%f vs. %f)" % (
         num_phase / N,
-        0.35,
+        0.4,
     )
 
 
@@ -114,7 +114,7 @@ def test_2qubitsPh_andfunction_eigenvectors():
     )
     N = 150
     results = np.array([])
-    for i in range(N):
+    for _ in range(N):
         autovector = eng.allocate_qureg(2)
         X | autovector[0]
         ancillas = eng.allocate_qureg(3)
@@ -129,9 +129,9 @@ def test_2qubitsPh_andfunction_eigenvectors():
         eng.flush()
 
     num_phase = (results == 0.125).sum()
-    assert num_phase / N >= 0.34, "Statistics phase calculation are not correct (%f vs. %f)" % (
+    assert num_phase / N >= 0.4, "Statistics phase calculation are not correct (%f vs. %f)" % (
         num_phase / N,
-        0.34,
+        0.4,
     )
 
 
@@ -147,7 +147,7 @@ def test_X_no_eigenvectors():
     results = np.array([])
     results_plus = np.array([])
     results_minus = np.array([])
-    for i in range(N):
+    for _ in range(N):
         autovector = eng.allocate_qureg(1)
         amplitude0 = (np.sqrt(2) + np.sqrt(6)) / 4.0
         amplitude1 = (np.sqrt(2) - np.sqrt(6)) / 4.0
@@ -179,10 +179,7 @@ def test_X_no_eigenvectors():
     assert total == pytest.approx(N, abs=5)
     assert plus_probability == pytest.approx(
         1.0 / 4.0, abs=1e-1
-    ), "Statistics on |+> probability are not correct (%f vs. %f)" % (
-        plus_probability,
-        1.0 / 4.0,
-    )
+    ), "Statistics on |+> probability are not correct ({} vs. {})".format(plus_probability, 1.0 / 4.0)
 
 
 def test_string():

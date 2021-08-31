@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2018 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -42,13 +43,15 @@ from projectq.setups import restrictedgateset
 #   1 then the last gate applied (during a decomposition!) was Ry(+math.pi/2)
 #   0 then the last gate applied (during a decomposition!) was a Rx
 
-prev_Ry_sign = {}  # Keeps track of most recent Ry sign, i.e.
+prev_Ry_sign = {}  # Keeps track of most recent Ry sign, i.e.   # noqa: N816
 #                        whether we had Ry(-pi/2) or Ry(pi/2)
 #                        prev_Ry_sign[qubit_index] should hold -1 or
 #                        +1
 
 
-def chooser_Ry_reducer(cmd, decomposition_list):  # pylint: disable=invalid-name, too-many-return-statements
+def chooser_Ry_reducer(  # pylint: disable=invalid-name, too-many-return-statements # noqa: N802
+    cmd, decomposition_list
+):
     """
     Choose the decomposition to maximise Ry cancellations.
 
@@ -78,7 +81,7 @@ def chooser_Ry_reducer(cmd, decomposition_list):  # pylint: disable=invalid-name
         except IndexError:
             pass
 
-    local_prev_Ry_sign = prev_Ry_sign.setdefault(cmd.engine, {})  # pylint: disable=invalid-name
+    local_prev_Ry_sign = prev_Ry_sign.setdefault(cmd.engine, {})  # pylint: disable=invalid-name # noqa: N806
 
     if name == 'cnot2rxx':
         ctrl_id = cmd.control_qubits[0].id

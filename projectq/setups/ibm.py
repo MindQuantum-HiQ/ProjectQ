@@ -52,8 +52,7 @@ def get_engine_list(token=None, device=None):
     if devices[device]['nq'] == 5:
         # The requested device is a 5 qubit processor
         # Obtain the coupling map specific to the device
-        coupling_map = devices[device]['coupling_map']
-        coupling_map = list2set(coupling_map)
+        coupling_map = list2set(devices[device]['coupling_map'])
         mapper = IBM5QubitMapper(coupling_map)
         ibm_setup = [mapper, SwapAndCNOTFlipper(coupling_map), LocalOptimizer(10)]
     elif device == 'ibmq_qasm_simulator':

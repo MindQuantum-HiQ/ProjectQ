@@ -59,6 +59,9 @@ def test_init_bad_time():
     with pytest.raises(TypeError):
         te.TimeEvolution(1.5j, hamiltonian)
 
+    with pytest.raises(TypeError):
+        te.TimeEvolution('3', hamiltonian)
+
 
 def test_init_bad_hamiltonian():
     with pytest.raises(TypeError):

@@ -35,7 +35,7 @@ def _decompose_ry(cmd):
         Uncompute(eng)
 
 
-def _recognize_RyNoCtrl(cmd):  # pylint: disable=invalid-name
+def _recognize_RyNoCtrl(cmd):  # pylint: disable=invalid-name  # noqa: N802
     """For efficiency reasons only if no control qubits."""
     return get_control_count(cmd) == 0
 

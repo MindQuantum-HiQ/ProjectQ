@@ -26,7 +26,7 @@ from projectq.meta import Compute, Control, Uncompute, get_control_count
 from projectq.ops import BasicGate, Toffoli, XGate
 
 
-def _recognize_CnU(cmd):  # pylint: disable=invalid-name
+def _recognize_CnU(cmd):  # pylint: disable=invalid-name # noqa: N802
     """Recognize an arbitrary gate which has n>=2 control qubits, except a Toffoli gate."""
     if get_control_count(cmd) == 2:
         if not isinstance(cmd.gate, XGate):
@@ -36,7 +36,7 @@ def _recognize_CnU(cmd):  # pylint: disable=invalid-name
     return False
 
 
-def _decompose_CnU(cmd):  # pylint: disable=invalid-name
+def _decompose_CnU(cmd):  # pylint: disable=invalid-name # noqa: N802
     """
     Decompose a multi-controlled gate U with n control qubits into a single- controlled U.
 

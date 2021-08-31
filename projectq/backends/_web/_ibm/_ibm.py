@@ -54,7 +54,7 @@ class IBMBackend(BasicEngine):  # pylint: disable=too-many-instance-attributes
         use_hardware=False,
         num_runs=1024,
         verbose=False,
-        token='',
+        token=None,
         device='ibmq_essex',
         num_retries=3000,
         interval=1,
@@ -253,11 +253,10 @@ class IBMBackend(BasicEngine):  # pylint: disable=too-many-instance-attributes
             raise RuntimeError("Please, run the circuit first!")
 
         probability_dict = {}
-        for state in self._probabilities:
+        for state, probability in self._probabilities.items():
             mapped_state = ['0'] * len(qureg)
             for i, val in enumerate(qureg):
                 mapped_state[i] = state[self._logical_to_physical(val.id)]
-            probability = self._probabilities[state]
             mapped_state = "".join(mapped_state)
             if mapped_state not in probability_dict:
                 probability_dict[mapped_state] = probability

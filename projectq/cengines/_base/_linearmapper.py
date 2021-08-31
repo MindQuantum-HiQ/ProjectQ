@@ -352,7 +352,7 @@ class LinearMapper(BasicMapperEngine):  # pylint: disable=too-many-instance-attr
         new_chain = [None] * num_qubits
 
         current_position_to_fill = 0
-        while len(remaining_segments):
+        while remaining_segments:
             best_segment = None
             best_padding = num_qubits
             highest_overlap_fraction = 0
@@ -420,8 +420,7 @@ class LinearMapper(BasicMapperEngine):  # pylint: disable=too-many-instance-attr
         used_mapped_ids = set(final_positions)
         used_mapped_ids.discard(None)
         all_ids = set(range(self.num_qubits))
-        not_used_mapped_ids = list(all_ids.difference(used_mapped_ids))
-        not_used_mapped_ids = sorted(not_used_mapped_ids, reverse=True)
+        not_used_mapped_ids = sorted(all_ids.difference(used_mapped_ids), reverse=True)
         for i, pos in enumerate(final_positions):
             if pos is None:
                 final_positions[i] = not_used_mapped_ids.pop()
@@ -459,8 +458,7 @@ class LinearMapper(BasicMapperEngine):  # pylint: disable=too-many-instance-attr
             active_ids.add(logical_id)
 
         new_stored_commands = []
-        for i in range(len(self._stored_commands)):
-            cmd = self._stored_commands[i]
+        for i, cmd in enumerate(self._stored_commands):
             if len(active_ids) == 0:
                 new_stored_commands += self._stored_commands[i:]
                 break
@@ -503,8 +501,8 @@ class LinearMapper(BasicMapperEngine):  # pylint: disable=too-many-instance-attr
                         mapped_ids.add(self.current_mapping[qubit.id])
                 # Check that mapped ids are nearest neighbour
                 if len(mapped_ids) == 2:
-                    mapped_ids = list(mapped_ids)
-                    diff = abs(mapped_ids[0] - mapped_ids[1])
+                    mapped_ids_list = list(mapped_ids)
+                    diff = abs(mapped_ids_list[0] - mapped_ids_list[1])
                     if self.cyclic:
                         if diff not in (1, self.num_qubits - 1):
                             send_gate = False

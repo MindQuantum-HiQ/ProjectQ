@@ -63,7 +63,7 @@ class AddConstant(BasicMathGate):
         return hash(str(self))
 
 
-def SubConstant(a):  # pylint: disable=invalid-name
+def SubConstant(a):  # pylint: disable=invalid-name # noqa: N802
     """
     Subtract a constant from a quantum number represented by a quantum register, stored from low- to high-bit.
 
@@ -134,7 +134,7 @@ class AddConstantModN(BasicMathGate):
         return hash(str(self))
 
 
-def SubConstantModN(a, N):  # pylint: disable=invalid-name
+def SubConstantModN(a, N):  # pylint: disable=invalid-name # noqa: N802
     """
     Subtract a constant from a quantum number represented by a quantum register modulo N.
 

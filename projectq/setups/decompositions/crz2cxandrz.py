@@ -23,7 +23,7 @@ from projectq.meta import get_control_count
 from projectq.ops import NOT, C, Rz
 
 
-def _decompose_CRz(cmd):  # pylint: disable=invalid-name
+def _decompose_CRz(cmd):  # pylint: disable=invalid-name # noqa: N802
     """Decompose the controlled Rz gate (into CNOT and Rz)."""
     qubit = cmd.qubits[0]
     ctrl = cmd.control_qubits
@@ -36,7 +36,7 @@ def _decompose_CRz(cmd):  # pylint: disable=invalid-name
     C(NOT, n_controls) | (ctrl, qubit)
 
 
-def _recognize_CRz(cmd):  # pylint: disable=invalid-name
+def _recognize_CRz(cmd):  # pylint: disable=invalid-name # noqa: N802
     """Recognize the controlled Rz gate."""
     return get_control_count(cmd) >= 1
 

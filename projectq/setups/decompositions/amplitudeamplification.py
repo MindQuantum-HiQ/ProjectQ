@@ -75,7 +75,7 @@ from projectq.meta import Compute, Control, CustomUncompute, Dagger
 from projectq.ops import QAA, All, Ph, X, Z
 
 
-def _decompose_QAA(cmd):  # pylint: disable=invalid-name
+def _decompose_QAA(cmd):  # pylint: disable=invalid-name # noqa: N802
     """Decompose the Quantum Amplitude Apmplification algorithm as a gate."""
     eng = cmd.engine
 

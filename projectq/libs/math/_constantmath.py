@@ -48,7 +48,7 @@ def add_constant(eng, constant, quint):
 
 
 # Modular adder by Beauregard https://arxiv.org/abs/quant-ph/0205095
-def add_constant_modN(eng, constant, N, quint):  # pylint: disable=invalid-name
+def add_constant_modN(eng, constant, N, quint):  # pylint: disable=invalid-name # noqa: N802
     """
     Add a classical constant c to a quantum integer (qureg) quint modulo N using Draper addition.
 
@@ -79,7 +79,7 @@ def add_constant_modN(eng, constant, N, quint):  # pylint: disable=invalid-name
 
 # Modular multiplication by modular addition & shift, followed by uncompute
 # from https://arxiv.org/abs/quant-ph/0205095
-def mul_by_constant_modN(eng, constant, N, quint_in):  # pylint: disable=invalid-name
+def mul_by_constant_modN(eng, constant, N, quint_in):  # pylint: disable=invalid-name # noqa: N802
     """
     Multiply a quantum integer by a classical number a modulo N.
 
@@ -113,7 +113,7 @@ def mul_by_constant_modN(eng, constant, N, quint_in):  # pylint: disable=invalid
     del quint_out
 
 
-def inv_mod_N(a, N):  # pylint: disable=invalid-name
+def inv_mod_N(a, N):  # pylint: disable=invalid-name # noqa: N802
     """Calculate the inverse of a modulo N."""
     # pylint: disable=invalid-name
     s = 0

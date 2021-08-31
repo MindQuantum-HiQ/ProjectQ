@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2018 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -105,14 +106,14 @@ def get_engine_list_linear_grid_base(mapper, one_qubit_gates="any", two_qubit_ga
         raise TypeError("one_qubit_gates parameter must be 'any' or a tuple.")
 
     rule_set = DecompositionRuleSet(modules=[projectq.libs.math, projectq.setups.decompositions])
-    allowed_gate_classes = []
-    allowed_gate_instances = []
+    allowed_gate_classes = ()
+    allowed_gate_instances = ()
     if one_qubit_gates != "any":
         for gate in one_qubit_gates:
             if inspect.isclass(gate):
-                allowed_gate_classes.append(gate)
+                allowed_gate_classes += (gate,)
             else:
-                allowed_gate_instances.append((gate, 0))
+                allowed_gate_instances += ((gate, 0),)
     if two_qubit_gates != "any":
         for gate in two_qubit_gates:
             if inspect.isclass(gate):
@@ -120,14 +121,12 @@ def get_engine_list_linear_grid_base(mapper, one_qubit_gates="any", two_qubit_ga
                 #  separate treatment
                 if isinstance(gate, ControlledGate):  # pragma: no cover
                     raise RuntimeError('Support for controlled gate not implemented!')
-                allowed_gate_classes.append(gate)
+                allowed_gate_classes += (gate,)
             else:
                 if isinstance(gate, ControlledGate):
-                    allowed_gate_instances.append((gate._gate, gate._n))  # pylint: disable=protected-access
+                    allowed_gate_instances += ((gate._gate, gate._n),)  # pylint: disable=protected-access
                 else:
-                    allowed_gate_instances.append((gate, 0))
-    allowed_gate_classes = tuple(allowed_gate_classes)
-    allowed_gate_instances = tuple(allowed_gate_instances)
+                    allowed_gate_instances += ((gate, 0),)
 
     def low_level_gates(eng, cmd):  # pylint: disable=unused-argument
         all_qubits = [q for qr in cmd.all_qubits for q in qr]

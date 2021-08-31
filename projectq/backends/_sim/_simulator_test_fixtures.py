@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #   Copyright 2021 ProjectQ-Framework (www.projectq.ch)
+#   Copyright 2021 <Huawei Technologies Co., Ltd>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,6 +13,9 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+# pylint: skip-file
+
+"""Test fixtures for simulator tests."""
 
 import pytest
 
@@ -24,11 +28,15 @@ def mapper(request):
     if request.param == "mapper":
 
         class TrivialMapper(BasicMapperEngine):
+            """Trivial mapper class."""
+
             def __init__(self):
+                """Initialize a TrivialMapper object."""
                 super().__init__()
                 self.current_mapping = {}
 
             def receive(self, command_list):
+                """Receive a list of commands and send them to the next engine."""
                 for cmd in command_list:
                     for qureg in cmd.all_qubits:
                         for qubit in qureg:

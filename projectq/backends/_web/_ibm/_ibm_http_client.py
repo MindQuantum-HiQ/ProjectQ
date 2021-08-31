@@ -175,23 +175,23 @@ class IBMQ(Session):
 
         # hack: the data value in the json quantum code is a string
         instruction_str = str(instructions).replace('\'', '\"')
-        data = '{"qobj_id": "' + str(uuid.uuid4()) + '", '
+        data = '{{"qobj_id": "{}", '.format(uuid.uuid4())
         data += '"header": {"backend_name": "' + device + '", '
         data += '"backend_version": "' + self.backends[device]['version'] + '"}, '
-        data += '"config": {"shots": ' + str(info['shots']) + ', '
-        data += '"max_credits": ' + str(maxcredit) + ', "memory": false, '
-        data += '"parameter_binds": [], "memory_slots": ' + str(n_classical_reg)
-        data += ', "n_qubits": ' + str(n_qubits) + '}, "schema_version": "1.2.0", '
+        data += '"config": {{"shots": {}, '.format(info['shots'])
+        data += '"max_credits": {}, "memory": false, '.format(maxcredit)
+        data += '"parameter_binds": [], "memory_slots": {}'.format(n_classical_reg)
+        data += ', "n_qubits": {}}}, "schema_version": "1.2.0", '.format(n_qubits)
         data += '"type": "QASM", "experiments": [{"config": '
-        data += '{"n_qubits": ' + str(n_qubits) + ', '
-        data += '"memory_slots": ' + str(n_classical_reg) + '}, '
-        data += '"header": {"qubit_labels": ' + str(q_label).replace('\'', '\"') + ', '
-        data += '"n_qubits": ' + str(n_classical_reg) + ', '
-        data += '"qreg_sizes": [["q", ' + str(n_qubits) + ']], '
-        data += '"clbit_labels": ' + str(c_label).replace('\'', '\"') + ', '
-        data += '"memory_slots": ' + str(n_classical_reg) + ', '
-        data += '"creg_sizes": [["c", ' + str(n_classical_reg) + ']], '
-        data += '"name": "circuit0", "global_phase": 0}, "instructions": ' + instruction_str + '}]}'
+        data += '{{"n_qubits": {}, '.format(n_qubits)
+        data += '"memory_slots": {}}}, '.format(n_classical_reg)
+        data += '"header": {{"qubit_labels": {}, '.format(q_label).replace('\'', '\"')
+        data += '"n_qubits": {}, '.format(n_classical_reg)
+        data += '"qreg_sizes": [["q", {}]], '.format(n_qubits)
+        data += '"clbit_labels": {}, '.format(c_label).replace('\'', '\"')
+        data += '"memory_slots": {}, '.format(n_classical_reg)
+        data += '"creg_sizes": [["c", {}]],'.format(n_classical_reg)
+        data += '"name": "circuit0", "global_phase": 0}}, "instructions": {}}}]}}'.format(instruction_str)
 
         json_step2 = {
             'data': data,

@@ -94,7 +94,7 @@ class PackageDescription:  # pylint: disable=too-many-instance-attributes,too-fe
         ]
         self.members.sort(key=lambda x: x[0].lower())
 
-    def get_ReST(self):  # pylint: disable=invalid-name,too-many-branches,too-many-statements
+    def get_ReST(self):  # pylint: disable=invalid-name,too-many-branches,too-many-statements # noqa: N802
         """Conversion to ReST formatted string."""
         new_lines = []
         new_lines.append(self.name)
