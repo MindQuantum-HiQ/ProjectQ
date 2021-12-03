@@ -91,7 +91,7 @@ option(LINKER_STRIP_ALL "Use --strip-all during linking" ON)
 
 option(BUILD_TESTING "Build the test suite?" OFF)
 
-# NB: most if not all of our libraries have the type explicitely specified.
+# NB: most if not all of our libraries have the type explicitly specified.
 option(BUILD_SHARED_LIBS "Build shared libs" OFF)
 
 option(USE_VERBOSE_MAKEFILE "Use verbose Makefiles" ON)

@@ -122,7 +122,8 @@ if(NOT pybind11_FOUND)
 
     # NB: _status == 0 means user site enabled. Anything else and we really should not consider it
     if(_status EQUAL 0 AND EXISTS "${_user_base}/share/cmake/pybind11/")
-      set(pybind11_DIR "${_user_base}/share/cmake/pybind11/") # cmake-lint: disable=C0103
+      # cmake-lint: disable=C0103
+      set(pybind11_DIR "${_user_base}/share/cmake/pybind11/")
     endif()
   endif()
 

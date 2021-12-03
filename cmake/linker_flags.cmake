@@ -16,6 +16,8 @@
 #
 # ==============================================================================
 
+# lint_cmake: -whitespace/indent
+
 # NB: no -Wl, here, CMake automatically adds the correct prefix for the linker
 if(LINKER_STRIP_ALL)
   test_link_option(

@@ -16,6 +16,8 @@
 #
 # ==============================================================================
 
+# lint_cmake: -whitespace/indent
+
 include(CheckCompilerFlag OPTIONAL RESULT_VARIABLE _check_compiler_flag)
 if(NOT _check_compiler_flag)
   include(Internal/CMakeCheckCompilerFlag)
@@ -42,7 +44,7 @@ endfunction()
 # ==============================================================================
 
 # ~~~
-# Convenience function to test for the existence of some compiler flags for a a particular langugae
+# Convenience function to test for the existence of some compiler flags for a a particular language
 #
 # check_compiler_flag(<lang> <var_prefix> <flags1> [<flags2>...])
 #
@@ -51,7 +53,7 @@ endfunction()
 # it will be added to the GLOBAL property named <prefix>_<lang> as well as to a variable with the same name. If the
 # property already exists, any valid flag is appended to the current value.
 #
-# Each call to this funcion also sets the _added_count variable to the number of flags added automatically (if any).
+# Each call to this function also sets the _added_count variable to the number of flags added automatically (if any).
 # ~~~
 function(check_compiler_flags lang var_prefix)
   # cmake-lint: disable=C0103,E1120
@@ -93,6 +95,9 @@ function(check_compiler_flags lang var_prefix)
   list(LENGTH _${lang}_opts _added_count)
   set(_added_count
       ${_added_count}
+      PARENT_SCOPE)
+  set(_added_flags
+      ${_${lang}_opts}
       PARENT_SCOPE)
 
   # Also set a variable for convenience
@@ -146,7 +151,7 @@ function(test_compile_option prefix)
           ${${prefix}_${lang}}
           PARENT_SCOPE)
 
-      if(TEST_CO_AUTO_ADD_CO)
+      if(TEST_CO_AUTO_ADD_CO AND _added_flags)
         string(CONFIGURE "${TEST_CO_GENEX}" _genex @ONLY)
         list(LENGTH ${prefix}_${lang} _L)
         math(EXPR _start_idx "${_L} - ${_added_count}")
@@ -164,7 +169,7 @@ endfunction()
 # ==============================================================================
 
 # ~~~
-# Convenience function to test for the existence of some compiler flags for a a particular langugae
+# Convenience function to test for the existence of some compiler flags for a a particular language
 #
 # check_link_flag(<lang> <var_prefix> [VERBATIM] <flags1> [<flags2>...])
 #
@@ -175,7 +180,7 @@ endfunction()
 #
 # If VERBATIM is passed as argument, the flag is passed onto the linker without prepending the 'LINKER:' prefix.
 #
-# Each call to this funcion also sets the _added_count variable to the number of flags added automatically (if any).
+# Each call to this function also sets the _added_count variable to the number of flags added automatically (if any).
 # ~~~
 function(check_link_flags lang var_prefix)
   # cmake-lint: disable=R0915,C0103,E1120
@@ -256,6 +261,9 @@ function(check_link_flags lang var_prefix)
   set(_added_count
       ${_added_count}
       PARENT_SCOPE)
+  set(_added_flags
+      ${_${lang}_link_opts}
+      PARENT_SCOPE)
 
   # Also set a variable for convenience
   set(${var_prefix}_${lang}
@@ -296,7 +304,11 @@ function(test_link_option prefix)
   endif()
 
   if(NOT TEST_LO_GENEX)
-    set(TEST_LO_GENEX "$<LINK_LANGUAGE:@lang@>")
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
+      set(TEST_LO_GENEX "$<LINK_LANGUAGE:@lang@>")
+    else()
+      set(TEST_LO_GENEX "1")
+    endif()
   endif()
 
   # cmake-lint: disable=C0103
@@ -313,7 +325,7 @@ function(test_link_option prefix)
           ${${prefix}_${lang}}
           PARENT_SCOPE)
 
-      if(TEST_LO_AUTO_ADD_LO)
+      if(TEST_LO_AUTO_ADD_LO AND _added_flags)
         string(CONFIGURE "${TEST_LO_GENEX}" _genex @ONLY)
         list(LENGTH ${prefix}_${lang} _L)
         math(EXPR _start_idx "${_L} - ${_added_count}")
@@ -335,7 +347,7 @@ endfunction()
 # ==============================================================================
 
 # ~~~
-# Appent a value to a property (creating the latter if necessary)
+# Append a value to a property (creating the latter if necessary)
 #
 # append_to_property(<property_name>
 #                    <GLOBAL             |

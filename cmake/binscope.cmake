@@ -36,7 +36,7 @@ function(gen_binscope_target)
   foreach(tgt ${ARGN})
     list(APPEND _binscope_args "-f")
     list(APPEND _binscope_args "$<TARGET_FILE:${tgt}>")
-  endforeach(tgt)
+  endforeach()
 
   add_custom_target(
     binscope
