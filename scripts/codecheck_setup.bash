@@ -20,6 +20,7 @@
 
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 PYTHON=$(which python3)
+echo "Using Python: $PYTHON"
 
 # ==============================================================================
 
@@ -58,8 +59,7 @@ run_cmd()
 
 run_python_cmd()
 {
-    python_locations=($PYTHON
-                      /devcloud/codechecktools/CloudDragon/uccp2.0/tools/python/python3/linux/bin/python)
+    python_locations=($PYTHON)
 
     for python in ${python_locations[@]}; do
         run_cmd $python "$@"
@@ -103,7 +103,3 @@ run_cmd $PYTHON setup.py gen_reqfile --include-extras=test,braket,pyparsing,docs
 
 pip_cmd install --user -r requirements.txt
 HIQ_DISABLE_CEXT=1 run_cmd $PYTHON setup.py develop --user --editable --build-directory pybuild --no-deps
-
-# Install for pylint tool
-PYTHON=/devcloud/codechecktools/CloudDragon/uccp2.0/tools/python/python3/linux/bin/python
-HIQ_DISABLE_CEXT=1 run_cmd $PYTHON -m pip install .

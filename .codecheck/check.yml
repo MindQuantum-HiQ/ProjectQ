@@ -30,6 +30,17 @@ tool_params:
   pylint:
     good-names: qb, id, i, j, k, N, op, Zero, One, X, Y, Z, R, U, U1, fSim, fSimParam, fSimNum, C, CRz
     min-similarity-lines: 20
+  secsolar:
+    compile_script: bash ./scripts/compiledb.bash
+
+env:
+  cache:
+    - type: workspace
+  resource:
+    type: docker
+    image: kweecr04.his.huawei.com:80/ecr-build-arm-gzkunpeng/hiq_projectq_open_source_gz1:1.1
+    class: 8U16G
+    mode: toolbox
 
 steps:
   pre_codecheck:
