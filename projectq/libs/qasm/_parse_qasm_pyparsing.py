@@ -396,7 +396,6 @@ class GateOp:
         Args:
             toks (pyparsing.Tokens): Pyparsing tokens
         """
-        # self.name = toks[0].lower()
         self.name = toks[0]
         if len(toks) == 2:
             self.params = []
@@ -693,8 +692,6 @@ class QiskitParser:
         angle_t = Literal("angle")
         fixed_t = Literal("fixed")
         float_t = Literal("float")
-        # length_t = Literal("length")
-        # stretch_t = Literal("stretch")
 
         # ----------------------------------------------------------------------
         # Other core types

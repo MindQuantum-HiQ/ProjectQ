@@ -88,11 +88,6 @@ class ExprParser:
         # and CaselessKeyword only match whole words
         e_const = CaselessKeyword("E").addParseAction(lambda: math.e)
         pi_const = (CaselessKeyword("PI") | CaselessKeyword("π")).addParseAction(lambda: math.pi)
-        # fnumber = Combine(Word("+-"+nums, nums) +
-        #                    Optional("." + Optional(Word(nums))) +
-        #                    Optional(e + Word("+-"+nums, nums)))
-        # or use provided pyparsing_common.number, but convert back to str:
-        # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
         fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
         fnumber = pyparsing_common.number
         cname = Word(alphas + "_", alphanums + '_')
