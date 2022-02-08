@@ -32,7 +32,8 @@ if(USE_OPENMP)
         LIBOMP_LIB omp gomp libomp
         HINTS /opt/local/lib
         PATH_SUFFIXES libomp
-        NO_DEFAULT_PATH)
+        NO_DEFAULT_PATH
+      )
       fin_path(
         LIBOMP_INC
         omp.h
@@ -40,7 +41,8 @@ if(USE_OPENMP)
         /opt/local/include
         PATH_SUFFIXES
         libomp
-        NO_DEFAULT_PATH)
+        NO_DEFAULT_PATH
+      )
       if(LIBOMP_LIB AND LIBOMP_INC)
         get_filename_component(LIBOMP_DIR ${LIBOMP_LIB} DIRECTORY)
         list(APPEND CMAKE_LIBRARY_PATH ${LIBOMP_DIR})
@@ -88,20 +90,22 @@ endif()
 # ==============================================================================
 
 find_package(
-  Python 3.5
-  COMPONENTS Interpreter Development
-  REQUIRED)
+  Python 3.5.0
+  COMPONENTS Interpreter Development.Module
+  REQUIRED
+)
 
 if(CMAKE_VERSION VERSION_LESS 3.17)
   message(CHECK_START "Looking for python SOABI")
 
   execute_process(
     COMMAND "${Python_EXECUTABLE}" "-c"
-            "from sysconfig import get_config_var; print (get_config_var ('EXT_SUFFIX') or s.get_config_var ('SO')) "
+    "from sysconfig import get_config_var; print (get_config_var ('EXT_SUFFIX') or s.get_config_var ('SO')) "
     RESULT_VARIABLE _soabi_success
     OUTPUT_VARIABLE _python_so_extension
     ERROR_VARIABLE _soabi_error_value
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
 
   if(NOT _soabi_success MATCHES 0)
     message(CHECK_FAIL "failed")
@@ -126,7 +130,8 @@ endif()
 find_program(
   binscope_exec
   NAMES binscope ${_binscope_name}
-  HINTS ${_binscope_path})
+  HINTS ${_binscope_path}
+)
 include(${CMAKE_CURRENT_LIST_DIR}/binscope.cmake)
 
 # ==============================================================================
