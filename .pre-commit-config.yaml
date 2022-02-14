@@ -39,7 +39,7 @@ repos:
 
   # Changes tabs to spaces
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.10
+    rev: v1.1.12
     hooks:
       - id: remove-tabs
 
@@ -50,14 +50,14 @@ repos:
         name: isort (python)
 
   - repo: https://github.com/psf/black
-    rev: 21.12b0
+    rev: 22.1.0
     hooks:
       - id: black
         language_version: python3
         # This is a slow hook, so only run this if --hook-stage manual is passed
         stages: [manual]
 
-  - repo: https://gitlab.com/PyCQA/flake8
+  - repo: https://github.com/PyCQA/flake8
     rev: 4.0.1
     hooks:
       - id: flake8
@@ -73,7 +73,7 @@ repos:
         files: ^(.*_test\.py)$
 
   - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: 'v3.0.0a3'
+    rev: 'v3.0.0a4'
     hooks:
       - id: pylint
         args: ['--score=n']
