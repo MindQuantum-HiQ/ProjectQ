@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "pybind11>=2.6.2", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=45", "wheel", "pybind11>=2.6.2", "setuptools_scm[toml]>=6"]
 build-backend = "setuptools.build_meta"
 
 # ==============================================================================
@@ -115,6 +115,8 @@ profile = "black"
 write_to = 'VERSION.txt'
 write_to_template = '{version}'
 local_scheme = 'no-local-version'
+fallback_version = 'v1.0.6'
+tag_regex = '^(?:[\w-]+-|projectq(?:[0-9]+.){0,2}[0-9]+-HiQ)?(?P<version>[vV]?\d+(?:\.\d+){0,2}[^\+]*)(?:\+.*)?$'
 
 [tool.yapf]
 

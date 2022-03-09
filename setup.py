@@ -557,8 +557,6 @@ def run_setup(with_cext):
         kwargs['ext_modules'] = []
 
     setuptools.setup(
-        use_scm_version={'local_scheme': 'no-local-version'},
-        setup_requires=['setuptools_scm'],
         cmdclass={
             'build_ext': CMakeBuildExt,
             'clean': Clean,
