@@ -219,9 +219,10 @@ def get_python_executable():
 def get_cmake_command():
     """Retrieve the path to the CMake executable."""
     try:
+        cmd = shutil.which('cmake')
         with utils.fdopen(os.devnull, 'w') as devnull:
-            subprocess.check_call(['cmake', '--version'], stdout=devnull, stderr=devnull)
-        return 'cmake'
+            subprocess.check_call([cmd, '--version'], stdout=devnull, stderr=devnull)
+        return cmd
     except (OSError, subprocess.CalledProcessError):
         pass
 
